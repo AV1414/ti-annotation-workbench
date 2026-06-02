@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
 import type { Annotation, Task } from '@/lib/types';
-import { submitAnnotationAction } from '@/app/annotate/actions';
+import { submitAnnotationAction, resetAnnotationsAction } from '@/app/annotate/actions';
 
 import { TaskFraming } from './TaskFraming';
 import { PromptCard } from './PromptCard';
@@ -39,11 +39,33 @@ function getAnnotatorFromStorage(): { id: string; name: string } {
 
 // ── Completion screen ─────────────────────────────────────────────────────
 
-function CompletionCard({ task, sessionCount, totalAnnotated }: {
+function CompletionCard({
+  task,
+  sessionCount,
+  totalAnnotated,
+  annotatorId,
+  onReset,
+}: {
   task: Task;
   sessionCount: number;
   totalAnnotated: number;
+  annotatorId: string;
+  onReset: () => void;
 }) {
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleReset = async () => {
+    if (!annotatorId || isResetting) return;
+    setIsResetting(true);
+    const result = await resetAnnotationsAction(task.id, annotatorId);
+    setIsResetting(false);
+    if (result.ok) {
+      onReset();
+    } else {
+      toast.error(`Reset failed: ${result.error ?? 'Unknown error'}`);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-md text-center space-y-6 py-16">
       <div className="text-5xl">🎉</div>
@@ -73,6 +95,24 @@ function CompletionCard({ task, sessionCount, totalAnnotated }: {
         </Button>
         <Button asChild>
           <Link href="/dashboard">View dashboard <ChevronRight className="size-4" /></Link>
+        </Button>
+      </div>
+      <div className="pt-2 border-t">
+        <p className="text-xs text-muted-foreground mb-3">
+          Want to re-annotate this task from scratch?
+        </p>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+          disabled={isResetting}
+          onClick={handleReset}
+        >
+          {isResetting ? (
+            <><Loader2 className="size-3 animate-spin" /> Resetting…</>
+          ) : (
+            'Reset my annotations'
+          )}
         </Button>
       </div>
     </div>
@@ -262,7 +302,19 @@ export function AnnotationForm({ task, allAnnotations: initialAnnotations }: Ann
       {/* Main content */}
       <div className="mx-auto w-full max-w-4xl px-4 py-8 flex-1">
         {isComplete ? (
-          <CompletionCard task={task} sessionCount={sessionCount} totalAnnotated={totalAnnotatedGlobal} />
+          <CompletionCard
+            task={task}
+            sessionCount={sessionCount}
+            totalAnnotated={totalAnnotatedGlobal}
+            annotatorId={annotatorId}
+            onReset={() => {
+              setLocalAnnotations((prev) => prev.filter((a) => a.annotatorId !== annotatorId));
+              setRatings({});
+              setComment('');
+              setSessionCount(0);
+              setPromptKey((k) => k + 1);
+            }}
+          />
         ) : (
           // key prop triggers fade-in on each new prompt
           <div

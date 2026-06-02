@@ -25,6 +25,11 @@ const SCALE_LABELS: Record<Task['ratingScale'], string> = {
   custom: 'Custom',
 };
 
+const METHODOLOGY_LABEL: Partial<Record<Task['ratingScale'], string>> = {
+  binary: 'Anthropic-style',
+  four_point: 'Meta-style',
+};
+
 interface TaskCardProps {
   task: Task;
   progress: TaskProgress;
@@ -41,7 +46,12 @@ export function TaskCard({ task, progress }: TaskCardProps) {
           <span className={`inline-flex h-5 items-center rounded-full px-2 text-[11px] font-medium ${TYPE_COLORS[task.taskType]}`}>
             {TYPE_LABELS[task.taskType]}
           </span>
-          <Badge variant="secondary" className="text-[11px]">{SCALE_LABELS[task.ratingScale]}</Badge>
+          <Badge variant="secondary" className="text-[11px]">
+            {SCALE_LABELS[task.ratingScale]}
+            {METHODOLOGY_LABEL[task.ratingScale] && (
+              <span className="ml-1 opacity-60">({METHODOLOGY_LABEL[task.ratingScale]})</span>
+            )}
+          </Badge>
         </div>
       </CardHeader>
 

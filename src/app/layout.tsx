@@ -15,8 +15,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TI Annotation Workbench",
-  description: "RLHF preference data collection for LLM training",
+  title: "TI Annotation Workbench — RLHF Preference Data Collection",
+  description:
+    "A configurable platform for collecting human preference annotations to train reward models — supports Anthropic-style binary comparisons and Meta-style multi-dimensional preference ratings.",
+  openGraph: {
+    title: "TI Annotation Workbench — RLHF Preference Data Collection",
+    description:
+      "A configurable platform for collecting human preference annotations to train reward models — supports Anthropic-style binary comparisons and Meta-style multi-dimensional preference ratings.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

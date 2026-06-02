@@ -85,8 +85,8 @@ export function TaskTable({ tasks }: TaskTableProps) {
 
   return (
     <>
-      <div className="rounded-lg border">
-        <Table>
+      <div className="rounded-lg border overflow-x-auto">
+        <Table className="min-w-[700px]">
           <TableHeader>
             <TableRow>
               <TableHead>Task</TableHead>

@@ -63,6 +63,23 @@ export async function listAnnotationsByTask(taskId: string): Promise<Annotation[
   return annotations.filter((a): a is Annotation => a !== null);
 }
 
+export async function deleteAnnotationsByAnnotatorAndTask(
+  taskId: string,
+  annotatorId: string,
+): Promise<number> {
+  const all = await listAnnotationsByTask(taskId);
+  const mine = all.filter((a) => a.annotatorId === annotatorId);
+  await Promise.all(
+    mine.map((a) =>
+      Promise.all([
+        kv.del(`annotation:${a.id}`),
+        kv.srem(`task:${taskId}:annotations`, a.id),
+      ]),
+    ),
+  );
+  return mine.length;
+}
+
 // ── Progress ───────────────────────────────────────────────────────────────
 
 export async function getProgress(taskId: string): Promise<TaskProgress> {

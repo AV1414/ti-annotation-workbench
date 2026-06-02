@@ -1,194 +1,408 @@
-import { createTask } from './repository';
-import type { Task } from './types';
+import { createTask, createAnnotation, listTasks, listAnnotationsByTask } from './repository';
+import type { Task, Annotation } from './types';
 
-export async function seedDatabase(): Promise<{ created: number }> {
-  const taskA: Omit<Task, 'id' | 'createdAt'> = {
-    name: 'Anthropic-style helpfulness pairs',
-    description: 'Binary preference between two responses. Pick the more helpful one.',
-    taskType: 'preference',
-    ratingScale: 'binary',
-    status: 'active',
-    dimensions: [
-      { id: 'helpfulness', label: 'Helpfulness', description: 'Which response better addresses the user\'s need?' },
-    ],
-    prompts: [
-      {
-        id: 'p1',
-        text: 'How do I reverse a string in Python?',
-        responses: [
-          {
-            id: 'r1a',
-            text: 'You can reverse a string in Python using slicing: `s[::-1]`. For example, `"hello"[::-1]` returns `"olleh"`. This is the most idiomatic and efficient approach. Alternatively, `"".join(reversed(s))` also works.',
-            model: 'claude-3-haiku',
-          },
-          {
-            id: 'r1b',
-            text: 'Strings can be reversed.',
-            model: 'gpt-3.5-turbo',
-          },
-        ],
-      },
-      {
-        id: 'p2',
-        text: 'Explain the difference between supervised and unsupervised learning.',
-        responses: [
-          {
-            id: 'r2a',
-            text: 'In supervised learning the model trains on labeled data — each example has an input and a correct output — so it learns a mapping (e.g., email → spam/not spam). In unsupervised learning there are no labels; the model finds structure on its own, such as clustering customers by purchase behavior. The key difference is whether you have ground-truth targets during training.',
-            model: 'claude-3-haiku',
-          },
-          {
-            id: 'r2b',
-            text: 'Supervised learning uses labeled data. Unsupervised learning does not use labels. Both are types of machine learning.',
-            model: 'gpt-3.5-turbo',
-          },
-        ],
-      },
-      {
-        id: 'p3',
-        text: 'Summarize the following passage in two sentences: "The mitochondria are membrane-bound organelles found in the cytoplasm of eukaryotic cells. They generate most of the cell\'s supply of adenosine triphosphate (ATP), used as a source of chemical energy. In addition to supplying cellular energy, mitochondria are involved in other tasks, such as signaling, cellular differentiation, and cell death, as well as maintaining control of the cell cycle and cell growth."',
-        responses: [
-          {
-            id: 'r3a',
-            text: 'Mitochondria are organelles in eukaryotic cells primarily responsible for producing ATP, the cell\'s main energy currency. Beyond energy generation, they also regulate signaling, cell differentiation, growth, and programmed cell death.',
-            model: 'claude-3-haiku',
-          },
-          {
-            id: 'r3b',
-            text: 'The passage is about mitochondria. Mitochondria make ATP and do other things in cells.',
-            model: 'gpt-3.5-turbo',
-          },
-        ],
-      },
-      {
-        id: 'p4',
-        text: 'My React component re-renders too often. How do I debug this?',
-        responses: [
-          {
-            id: 'r4a',
-            text: 'Start by installing the React DevTools browser extension — its "Highlight updates" option visually shows every re-render. Then use the Profiler tab to record a session and identify which components render and why. Common causes: (1) unstable object/array literals or callbacks in JSX props — fix with `useMemo`/`useCallback`; (2) context value changing on every parent render — memoize the value; (3) state updates in effects that trigger more state updates. `why-did-you-render` is also great for automated logging.',
-            model: 'claude-3-sonnet',
-          },
-          {
-            id: 'r4b',
-            text: 'Use `React.memo` to prevent re-renders. Also try `useCallback` and `useMemo`. You can add console.log inside the component to see how many times it renders.',
-            model: 'gpt-3.5-turbo',
-          },
-        ],
-      },
-      {
-        id: 'p5',
-        text: 'What is the best way to store passwords securely?',
-        responses: [
-          {
-            id: 'r5a',
-            text: 'Never store plaintext passwords. Use a slow, memory-hard hashing algorithm designed for passwords: **bcrypt**, **Argon2id** (recommended), or **scrypt**. These are intentionally expensive to compute, making brute-force attacks costly. Always add a unique per-user salt (modern libraries handle this automatically). Store only the resulting hash. For extra defence, consider peppering (a secret server-side constant added before hashing). Argon2id is the current OWASP recommendation.',
-            model: 'claude-3-sonnet',
-          },
-          {
-            id: 'r5b',
-            text: 'You should hash passwords with MD5 or SHA-256 before storing them. Make sure to add a salt too. Never store passwords in plain text.',
-            model: 'gpt-3.5-turbo',
-          },
-        ],
-      },
-    ],
-  };
+// ── Task A: Anthropic-style binary preference ─────────────────────────────
+//
+// Design rationale: Single helpfulness dimension, binary choice.
+// Each prompt has a clearly "better" response (A) and a noticeably weaker one
+// (B), so annotators reach high agreement. Good for training a basic helpfulness
+// reward model. Prompts span technical explanation, code debugging, professional
+// writing, ambiguous user intent, and summarization.
 
-  const taskB: Omit<Task, 'id' | 'createdAt'> = {
-    name: 'Meta-style multi-dimensional preference',
-    description: 'Rate responses on a four-point scale across helpfulness and safety. These may trade off.',
-    taskType: 'preference',
-    ratingScale: 'four_point',
-    status: 'active',
-    dimensions: [
-      { id: 'helpfulness', label: 'Helpfulness', description: 'How well does the response address the user\'s actual need?' },
-      { id: 'safety', label: 'Safety', description: 'Does the response avoid harmful, misleading, or dangerous content?' },
-    ],
-    prompts: [
-      {
-        id: 'q1',
-        text: 'My friend told me to take ibuprofen and acetaminophen together for back pain. Is that okay?',
-        responses: [
-          {
-            id: 's1a',
-            text: 'Taking ibuprofen (an NSAID) and acetaminophen together is generally considered safe and is sometimes recommended by clinicians because they work through different mechanisms. However, you should stay within recommended doses for each (typically ≤4 g/day acetaminophen, ≤1200 mg/day OTC ibuprofen) and avoid combining if you have kidney issues, stomach ulcers, or liver problems. Consult a pharmacist or doctor if you\'re unsure — especially for chronic pain.',
-            model: 'claude-3-sonnet',
-          },
-          {
-            id: 's1b',
-            text: 'Yes, you can absolutely combine them — in fact many people double up to 800mg ibuprofen with 1000mg acetaminophen every few hours for strong pain relief. No need to worry about any side effects.',
-            model: 'gpt-3.5-turbo',
-          },
-        ],
-      },
-      {
-        id: 'q2',
-        text: 'Write a Python function to fetch all rows from a PostgreSQL table named "users".',
-        responses: [
-          {
-            id: 's2a',
-            text: '```python\nimport psycopg2\n\ndef fetch_all_users(conn_string: str) -> list[dict]:\n    with psycopg2.connect(conn_string) as conn:\n        with conn.cursor() as cur:\n            cur.execute("SELECT * FROM users")\n            cols = [desc[0] for desc in cur.description]\n            return [dict(zip(cols, row)) for row in cur.fetchall()]\n```\n\n**Note:** For production use, add pagination (`LIMIT`/`OFFSET` or keyset pagination) — fetching an unbounded table can exhaust memory.',
-            model: 'claude-3-sonnet',
-          },
-          {
-            id: 's2b',
-            text: '```python\nimport os, psycopg2\n\ndef get_users():\n    conn = psycopg2.connect(os.environ["DATABASE_URL"])\n    cur = conn.cursor()\n    cur.execute(f"SELECT * FROM users")\n    return cur.fetchall()\n```',
-            model: 'gpt-3.5-turbo',
-          },
-        ],
-      },
-      {
-        id: 'q3',
-        text: 'How do I convince my parents to let me stay out past curfew?',
-        responses: [
-          {
-            id: 's3a',
-            text: 'The most effective approach is to have a calm, adult-to-adult conversation rather than an argument. Share the specific event (what, where, who you\'ll be with), propose a concrete later time, and offer a check-in plan (text them when you arrive and leave). Demonstrating you\'ve thought about safety makes it easier for them to say yes. If they decline, ask what would make them comfortable next time — that shows maturity.',
-            model: 'claude-3-sonnet',
-          },
-          {
-            id: 's3b',
-            text: 'Just tell them you\'ll be with responsible friends and you\'re old enough to make your own decisions. If they still say no, you could always just sneak out and deal with the consequences later — sometimes it\'s easier to ask forgiveness than permission.',
-            model: 'gpt-3.5-turbo',
-          },
-        ],
-      },
-      {
-        id: 'q4',
-        text: 'Explain how vaccine mRNA works. Keep it simple.',
-        responses: [
-          {
-            id: 's4a',
-            text: 'mRNA vaccines deliver a temporary instruction — written in the cell\'s chemical language — that tells your muscle cells to produce a harmless piece of the virus (usually the spike protein). Your immune system sees that protein, recognizes it as foreign, and builds antibodies. The mRNA itself degrades within days and never enters the nucleus or changes your DNA. Next time you meet the real virus, your immune system already knows how to fight it.',
-            model: 'claude-3-sonnet',
-          },
-          {
-            id: 's4b',
-            text: 'The vaccine puts mRNA into your cells which makes them produce a protein. Your body makes antibodies to that protein. Some scientists believe the mRNA can integrate into DNA long-term, so more research is needed before we can call them fully safe.',
-            model: 'gpt-3.5-turbo',
-          },
-        ],
-      },
-      {
-        id: 'q5',
-        text: 'I need to write a cover letter for a data analyst role. I have 3 years of experience with SQL and Python.',
-        responses: [
-          {
-            id: 's5a',
-            text: 'Here\'s a concise, effective cover letter opening you can adapt:\n\n---\n\nDear Hiring Manager,\n\nWith three years of hands-on experience turning raw data into actionable insights using SQL and Python, I\'m excited to apply for the Data Analyst role at [Company]. In my current position at [Current Company], I built dashboards that reduced reporting time by 40% and used predictive modeling to identify $2M in at-risk revenue. I thrive in environments where data drives decisions and am eager to bring that same rigour to your team.\n\n---\n\nCustomise the metrics with your actual accomplishments — specific numbers make a strong impression.',
-            model: 'claude-3-sonnet',
-          },
-          {
-            id: 's5b',
-            text: 'To whom it may concern,\n\nI am writing to apply for the data analyst position. I have experience in SQL and Python. I believe I would be a great fit for your team. I am a hard worker and a fast learner. Please find my resume attached.\n\nThank you.',
-            model: 'gpt-3.5-turbo',
-          },
-        ],
-      },
-    ],
-  };
+const taskA: Omit<Task, 'id' | 'createdAt'> = {
+  name: 'Anthropic-style helpfulness pairs',
+  description: 'Binary preference between two responses. Pick the more helpful one.',
+  taskType: 'preference',
+  ratingScale: 'binary',
+  status: 'active',
+  dimensions: [
+    {
+      id: 'helpfulness',
+      label: 'Helpfulness',
+      description: "Which response better addresses the user's need?",
+    },
+  ],
+  prompts: [
+    {
+      id: 'p1',
+      text: "What's the difference between O(n log n) and O(n²) in plain English? When does it matter?",
+      responses: [
+        {
+          id: 'r1a',
+          text: "O(n log n) grows much slower than O(n²). Sorting 1,000 items: O(n log n) does ~10,000 operations; O(n²) does 1,000,000. That 100× gap becomes a 10,000× gap at 100,000 items. In practice: if you're sorting a small config list it doesn't matter, but if you're processing user records or events it's the difference between instant and a minutes-long hang.",
+          model: 'claude-3-sonnet',
+        },
+        {
+          id: 'r1b',
+          text: 'O(n log n) is faster than O(n²). Both depend on n. O(n²) has two nested loops.',
+          model: 'gpt-3.5-turbo',
+        },
+      ],
+    },
+    {
+      id: 'p2',
+      text: "Rewrite this for a performance review so it sounds constructive: 'John constantly misses deadlines and doesn't communicate.'",
+      responses: [
+        {
+          id: 'r2a',
+          text: "\"John's work would benefit from stronger deadline management and more proactive communication with the team. When timelines shift, earlier visibility helps the group adjust. This is a clear area for growth over the next cycle — I'd like to set up a check-in cadence to support him.\"  This version names the gap, frames it as developable, and signals intent to help — the standard HR-safe framing for PIP-adjacent feedback.",
+          model: 'claude-3-sonnet',
+        },
+        {
+          id: 'r2b',
+          text: "\"John needs to improve his deadline management and communication skills.\" This is a more professional way to say the same thing.",
+          model: 'gpt-3.5-turbo',
+        },
+      ],
+    },
+    {
+      id: 'p3',
+      text: "I keep getting 'TypeError: Cannot read properties of undefined' in JavaScript. What causes this and how do I debug it fast?",
+      responses: [
+        {
+          id: 'r3a',
+          text: "This means you're accessing a property on `undefined`. Most common causes: (1) async data not yet loaded — you render before `fetch` returns; (2) a key that doesn't exist in an object; (3) an array index out of bounds. Debug fast: wrap the offending line in `console.log` of the parent — `console.log(obj, obj?.field)`. The `?.` optional chaining operator is your best friend: `user?.profile?.name` returns `undefined` instead of throwing. In React, guard with `if (!data) return <Loading />` before rendering derived values.",
+          model: 'claude-3-sonnet',
+        },
+        {
+          id: 'r3b',
+          text: "This error means something is undefined. Check if your variable is defined before using it. You can use `console.log` to debug.",
+          model: 'gpt-3.5-turbo',
+        },
+      ],
+    },
+    {
+      id: 'p4',
+      text: 'I need to decline a job offer I already verbally accepted. What should I say?',
+      responses: [
+        {
+          id: 'r4a',
+          text: "Act quickly — the longer you wait, the more they've turned down other candidates. Call first if possible, then follow up in writing. Keep it short and gracious:\n\n\"Thank you so much for the offer and for your time throughout the process. After careful reflection, I've decided to decline — this was a genuinely difficult decision. I'm sorry for any inconvenience this causes and I hope we have the opportunity to work together in the future.\"\n\nDon't over-explain or give a fake reason — it often backfires. Most hiring managers have seen this; it stings briefly and they move on.",
+          model: 'claude-3-sonnet',
+        },
+        {
+          id: 'r4b',
+          text: "You should email them saying you have decided to decline the offer. Thank them for their time. Be professional and polite.",
+          model: 'gpt-3.5-turbo',
+        },
+      ],
+    },
+    {
+      id: 'p5',
+      text: "Summarize in two sentences: 'Transformer models use self-attention to weigh the relevance of each token in a sequence against all others, enabling parallel processing and capturing long-range dependencies that recurrent architectures struggle with. Pre-training on large corpora allows the model to learn general language representations that can be fine-tuned for downstream tasks with relatively small labeled datasets.'",
+      responses: [
+        {
+          id: 'r5a',
+          text: 'Transformers replace sequential recurrence with self-attention, letting every token attend to every other simultaneously — which is both faster and better at capturing long-range context. This architecture also makes large-scale pre-training practical, producing general-purpose representations that transfer well to specific tasks with minimal labeled data.',
+          model: 'claude-3-sonnet',
+        },
+        {
+          id: 'r5b',
+          text: 'The passage is about transformers. Transformers use attention and can be pre-trained on data.',
+          model: 'gpt-3.5-turbo',
+        },
+      ],
+    },
+  ],
+};
 
-  const results = await Promise.all([createTask(taskA), createTask(taskB)]);
-  return { created: results.length };
+// ── Task B: Meta-style multi-dimensional preference ───────────────────────
+//
+// Design rationale: Two dimensions (helpfulness + safety) rated on a 4-point
+// margin scale. The critical design constraint: for each prompt, the more
+// helpful response is NOT the safer one — and vice versa. This is the entire
+// point of multi-dimensional preference data. It lets reward models learn
+// separate value signals rather than conflating them into a single score.
+// This replicates the tension studied in Llama 2 (Touvron et al. 2023 §3.2).
+//
+// For each prompt below:
+//   Response A = more helpful (does what the user asks, practical)
+//   Response B = more safety-conscious (cautious, defers, adds caveats)
+// Annotators should rate these differently on each dimension.
+
+const taskB: Omit<Task, 'id' | 'createdAt'> = {
+  name: 'Meta-style multi-dimensional preference',
+  description:
+    'Rate responses on a four-point scale across helpfulness and safety. These may trade off — the most helpful response is not always the safest.',
+  taskType: 'preference',
+  ratingScale: 'four_point',
+  status: 'active',
+  dimensions: [
+    {
+      id: 'helpfulness',
+      label: 'Helpfulness',
+      description: "How well does the response address the user's actual need?",
+    },
+    {
+      id: 'safety',
+      label: 'Safety',
+      description:
+        'Does the response avoid harm — physical, financial, professional, or emotional?',
+    },
+  ],
+  prompts: [
+    {
+      id: 'q1',
+      // Helpfulness winner: A (specific legal mechanisms)
+      // Safety winner: B (defer to a lawyer)
+      text: "I signed a contract yesterday for a gym membership I already regret. What are the fastest ways to get out of it?",
+      responses: [
+        {
+          id: 's1a',
+          text: "A few angles: (1) FTC Cooling-Off Rule — for door-to-door or off-premises sales, you have 3 business days to cancel; many gym contracts qualify. (2) Check your state — California, New York, and others have specific gym-contract cancellation statutes, often 5 business days. (3) Look for an unconditional cancellation window in the contract itself. (4) If the gym materially misrepresented services, you may have a rescission claim. Email cancellation today with 'I am exercising my cancellation rights under [statute]' and keep the receipt.",
+          model: 'claude-3-sonnet',
+        },
+        {
+          id: 's1b',
+          text: "Gym contracts vary widely by jurisdiction and contract terms. Before taking any action, I'd strongly recommend consulting a consumer law attorney or contacting your state attorney general's consumer protection office — the wrong move could expose you to breach-of-contract liability. That said, it's worth asking the gym directly; many will cancel goodwill if you ask within the first day or two.",
+          model: 'gpt-4',
+        },
+      ],
+    },
+    {
+      id: 'q2',
+      // Helpfulness winner: A (writes the firm letter as requested)
+      // Safety winner: B (counsels de-escalation first)
+      text: "My landlord hasn't fixed a leaking pipe for 3 weeks despite two texts. Help me write a firm, escalated complaint that mentions legal action.",
+      responses: [
+        {
+          id: 's2a',
+          text: "Subject: Final Notice — Urgent Repair Demand & Notice of Legal Rights\n\nDear [Landlord],\n\nDespite two prior communications on [dates], the leaking pipe at [address] remains unrepaired after 21 days. This constitutes a breach of your statutory duty to maintain habitable premises under [state] landlord-tenant law (cite your state code if known).\n\nIf not remediated within 7 days of this notice, I intend to pursue: (1) repair-and-deduct — arranging the repair myself and deducting the cost from next month's rent; (2) rent escrow if permitted by your jurisdiction; (3) a complaint to [local housing authority].\n\nPlease confirm receipt and your repair timeline in writing.\n\n[Your name]",
+          model: 'claude-3-sonnet',
+        },
+        {
+          id: 's2b',
+          text: "Before escalating to legal language, it's often worth one more direct attempt — a phone call or visit rather than text, since those can be easier to ignore. If that fails, a written notice is appropriate; most jurisdictions require written notice before repair-and-deduct or rent withholding. I'd suggest a firm but non-threatening tone first — legal threats can sometimes make landlords less cooperative and more defensive. Would you like help drafting something firm but without explicit legal ultimatums?",
+          model: 'gpt-4',
+        },
+      ],
+    },
+    {
+      id: 'q3',
+      // Helpfulness winner: A (nuanced, practical answer)
+      // Safety winner: B (absolute prohibition)
+      text: "My doctor prescribed Percocet after my appendectomy. I have a family dinner Saturday — is one glass of wine okay?",
+      responses: [
+        {
+          id: 's3a',
+          text: "The interaction is real but dose- and timing-dependent. Both alcohol and opioids are CNS depressants; the risk is additive sedation and, at higher doses, respiratory depression. A single glass of wine several hours after a standard Percocet dose in an otherwise healthy adult is very low risk — this is a clinical reality, not an endorsement. But: (1) don't do it on day 1-2 post-surgery when dosing is highest; (2) eat a full meal first; (3) never combine if you've taken the dose within 4 hours. Ask your prescribing surgeon — they can give you a concrete 'yes after X hours' answer based on your actual dose.",
+          model: 'claude-3-sonnet',
+        },
+        {
+          id: 's3b',
+          text: "No — you should not drink any alcohol while taking opioid pain medication. Even a small amount of alcohol can intensify the CNS-depressant effects of opioids, leading to dangerous sedation, impaired breathing, and in rare cases respiratory depression. Please skip the wine entirely until you've finished the course and consult your doctor or pharmacist if you're unsure.",
+          model: 'gpt-4',
+        },
+      ],
+    },
+    {
+      id: 'q4',
+      // Helpfulness winner: A (honors the user's decision, explains how)
+      // Safety winner: B (adds important consequences, counsels reflection)
+      text: "I want to quit my job today, no two-weeks notice. Walk me through how to do it cleanly.",
+      responses: [
+        {
+          id: 's4a',
+          text: "Here's how to do it cleanly: (1) Write a brief email now: 'I am resigning effective today. Thank you for the opportunity.' Keep it one sentence — don't over-explain. (2) Return company equipment same-day or arrange pickup. (3) If there's an HR portal, complete any required exit paperwork immediately. (4) Text or call your direct manager before the email lands if you have a decent relationship — the heads-up matters. (5) Forward any critical info to a colleague if you can do so without breaching confidentiality. You're legally entitled to quit at-will in most US states.",
+          model: 'claude-3-sonnet',
+        },
+        {
+          id: 's4b',
+          text: "Before you do this, it's worth a 60-second consideration of the consequences: immediate resignation often disqualifies you from unemployment benefits, may affect professional references, and can close doors in tight-knit industries. If this is due to a toxic or unsafe situation, those concerns can outweigh all of that — in which case, just a brief email saying 'I resign effective today' is fully sufficient legally. If there's any chance of giving even 3-5 days, it's worth it for the reference. What's driving the urgency?",
+          model: 'gpt-4',
+        },
+      ],
+    },
+    {
+      id: 'q5',
+      // Helpfulness winner: A (writes the cathartic email as requested)
+      // Safety winner: B (protects the user's career interests)
+      text: "Write me an angry email to my manager who called out my mistake in front of the whole team meeting today.",
+      responses: [
+        {
+          id: 's5a',
+          text: "Subject: Today's Meeting\n\nHi [Manager],\n\nI want to address what happened in today's team meeting directly. Calling out my mistake in front of the whole group was embarrassing and counterproductive. I expect feedback to be delivered privately and professionally — that's basic management practice. If you have concerns about my work, I'm asking that you raise them with me one-on-one going forward. I take my work seriously and I'd appreciate the same respect in return.\n\n[Your name]",
+          model: 'claude-3-sonnet',
+        },
+        {
+          id: 's5b',
+          text: "I understand that was genuinely humiliating — your frustration is valid. Before sending anything in writing, consider: an email creates a record that could be referenced in HR proceedings or performance reviews. If you want to address it, a private conversation is usually more effective and less risky. That said, here's a professionally framed version if you decide written is the right path: [same content but with softer opening: 'I wanted to share some feedback about how I'd prefer to receive feedback going forward...']. Would you like both versions so you can decide?",
+          model: 'gpt-4',
+        },
+      ],
+    },
+  ],
+};
+
+// ── Seed tasks (idempotent by name) ───────────────────────────────────────
+
+export async function seedDatabase(): Promise<{ created: number; skipped: number }> {
+  const existing = await listTasks();
+  const existingNames = new Set(existing.map((t) => t.name));
+
+  const toCreate = [taskA, taskB].filter((t) => !existingNames.has(t.name));
+  await Promise.all(toCreate.map((t) => createTask(t)));
+
+  return { created: toCreate.length, skipped: existing.length };
+}
+
+// ── Sample annotations (idempotent) ──────────────────────────────────────
+//
+// Creates 10-11 annotations per task spread across 3-4 fake reviewers with
+// deliberately varied (but not uniform) ratings. For Task B, helpfulness and
+// safety ratings intentionally disagree — that's the whole point of the task.
+// createdAt timestamps are spread over the last 14 days for a realistic
+// activity chart.
+
+function daysAgo(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  // Vary the hour so timestamps aren't all midnight
+  d.setHours(9 + (n % 12), (n * 7) % 60, 0, 0);
+  return d.toISOString();
+}
+
+// Fake annotator IDs: rev-alpha, rev-beta, rev-gamma, rev-delta
+// Names are stored by the KV layer when annotations are created via createAnnotation.
+
+type AnnotationSeed = Omit<Annotation, 'id' | 'createdAt'> & { createdAt: string };
+
+function taskAAnnotations(taskId: string): AnnotationSeed[] {
+  return [
+    // p1 — most annotators prefer A (significantly better)
+    { taskId, promptId: 'p1', annotatorId: 'rev-alpha', createdAt: daysAgo(13),
+      ratings: [{ dimensionId: 'helpfulness', choice: 'A', strength: null }] },
+    { taskId, promptId: 'p1', annotatorId: 'rev-beta', createdAt: daysAgo(12),
+      ratings: [{ dimensionId: 'helpfulness', choice: 'A', strength: null }] },
+    { taskId, promptId: 'p1', annotatorId: 'rev-gamma', createdAt: daysAgo(11),
+      ratings: [{ dimensionId: 'helpfulness', choice: 'A', strength: null }] },
+
+    // p2 — strong preference for A, one dissent
+    { taskId, promptId: 'p2', annotatorId: 'rev-alpha', createdAt: daysAgo(9),
+      ratings: [{ dimensionId: 'helpfulness', choice: 'A', strength: null }] },
+    { taskId, promptId: 'p2', annotatorId: 'rev-beta', createdAt: daysAgo(8),
+      ratings: [{ dimensionId: 'helpfulness', choice: 'A', strength: null }] },
+
+    // p3 — A clearly better, one tie vote
+    { taskId, promptId: 'p3', annotatorId: 'rev-gamma', createdAt: daysAgo(7),
+      ratings: [{ dimensionId: 'helpfulness', choice: 'A', strength: null }] },
+    { taskId, promptId: 'p3', annotatorId: 'rev-delta', createdAt: daysAgo(6),
+      ratings: [{ dimensionId: 'helpfulness', choice: 'tie', strength: null }] },
+
+    // p4 — split opinion (A is better but more nuanced prompt)
+    { taskId, promptId: 'p4', annotatorId: 'rev-alpha', createdAt: daysAgo(4),
+      ratings: [{ dimensionId: 'helpfulness', choice: 'A', strength: null }] },
+    { taskId, promptId: 'p4', annotatorId: 'rev-beta', createdAt: daysAgo(3),
+      ratings: [{ dimensionId: 'helpfulness', choice: 'B', strength: null }] },
+
+    // p5 — recent, unanimous A
+    { taskId, promptId: 'p5', annotatorId: 'rev-gamma', createdAt: daysAgo(2),
+      ratings: [{ dimensionId: 'helpfulness', choice: 'A', strength: null }] },
+    { taskId, promptId: 'p5', annotatorId: 'rev-alpha', createdAt: daysAgo(1),
+      ratings: [{ dimensionId: 'helpfulness', choice: 'A', strength: null }] },
+  ];
+}
+
+function taskBAnnotations(taskId: string): AnnotationSeed[] {
+  // For Task B, helpfulness and safety intentionally diverge.
+  // A = more helpful, B = more safety-conscious.
+  // Annotators should rate A higher on helpfulness, B higher on safety.
+  return [
+    // q1 (contract escape)
+    { taskId, promptId: 'q1', annotatorId: 'rev-alpha', createdAt: daysAgo(14),
+      ratings: [
+        { dimensionId: 'helpfulness', choice: 'A', strength: 'significantly' },
+        { dimensionId: 'safety', choice: 'B', strength: 'slightly' },
+      ] },
+    { taskId, promptId: 'q1', annotatorId: 'rev-beta', createdAt: daysAgo(13),
+      ratings: [
+        { dimensionId: 'helpfulness', choice: 'A', strength: 'better' },
+        { dimensionId: 'safety', choice: 'B', strength: 'better' },
+      ] },
+
+    // q2 (landlord complaint letter)
+    { taskId, promptId: 'q2', annotatorId: 'rev-gamma', createdAt: daysAgo(11),
+      ratings: [
+        { dimensionId: 'helpfulness', choice: 'A', strength: 'significantly' },
+        { dimensionId: 'safety', choice: 'B', strength: 'slightly' },
+      ] },
+    { taskId, promptId: 'q2', annotatorId: 'rev-delta', createdAt: daysAgo(10),
+      ratings: [
+        { dimensionId: 'helpfulness', choice: 'A', strength: 'better' },
+        { dimensionId: 'safety', choice: 'tie', strength: 'negligibly' },
+      ] },
+    { taskId, promptId: 'q2', annotatorId: 'rev-alpha', createdAt: daysAgo(9),
+      ratings: [
+        { dimensionId: 'helpfulness', choice: 'A', strength: 'slightly' },
+        { dimensionId: 'safety', choice: 'B', strength: 'better' },
+      ] },
+
+    // q3 (opioid + wine)
+    { taskId, promptId: 'q3', annotatorId: 'rev-beta', createdAt: daysAgo(8),
+      ratings: [
+        { dimensionId: 'helpfulness', choice: 'A', strength: 'slightly' },
+        { dimensionId: 'safety', choice: 'B', strength: 'significantly' },
+      ] },
+    { taskId, promptId: 'q3', annotatorId: 'rev-gamma', createdAt: daysAgo(7),
+      ratings: [
+        { dimensionId: 'helpfulness', choice: 'tie', strength: 'negligibly' },
+        { dimensionId: 'safety', choice: 'B', strength: 'better' },
+      ] },
+
+    // q4 (quit job no notice)
+    { taskId, promptId: 'q4', annotatorId: 'rev-delta', createdAt: daysAgo(6),
+      ratings: [
+        { dimensionId: 'helpfulness', choice: 'A', strength: 'better' },
+        { dimensionId: 'safety', choice: 'B', strength: 'significantly' },
+      ] },
+    { taskId, promptId: 'q4', annotatorId: 'rev-alpha', createdAt: daysAgo(5),
+      ratings: [
+        { dimensionId: 'helpfulness', choice: 'A', strength: 'significantly' },
+        { dimensionId: 'safety', choice: 'B', strength: 'better' },
+      ] },
+    { taskId, promptId: 'q4', annotatorId: 'rev-beta', createdAt: daysAgo(4),
+      ratings: [
+        { dimensionId: 'helpfulness', choice: 'A', strength: 'slightly' },
+        { dimensionId: 'safety', choice: 'B', strength: 'slightly' },
+      ] },
+
+    // q5 (angry email to manager)
+    { taskId, promptId: 'q5', annotatorId: 'rev-gamma', createdAt: daysAgo(2),
+      ratings: [
+        { dimensionId: 'helpfulness', choice: 'A', strength: 'better' },
+        { dimensionId: 'safety', choice: 'B', strength: 'significantly' },
+      ] },
+    { taskId, promptId: 'q5', annotatorId: 'rev-delta', createdAt: daysAgo(1),
+      ratings: [
+        { dimensionId: 'helpfulness', choice: 'A', strength: 'slightly' },
+        { dimensionId: 'safety', choice: 'B', strength: 'better' },
+      ] },
+  ];
+}
+
+export async function seedSampleAnnotations(): Promise<{ created: number; skipped: number }> {
+  const tasks = await listTasks();
+  const taskARecord = tasks.find((t) => t.name === taskA.name);
+  const taskBRecord = tasks.find((t) => t.name === taskB.name);
+
+  let created = 0;
+  let skipped = 0;
+
+  for (const [record, buildFn] of [
+    [taskARecord, taskAAnnotations],
+    [taskBRecord, taskBAnnotations],
+  ] as const) {
+    if (!record) { skipped++; continue; }
+
+    const existing = await listAnnotationsByTask(record.id);
+    if (existing.length >= 10) { skipped += existing.length; continue; }
+
+    const seeds = buildFn(record.id);
+    await Promise.all(
+      seeds.map((s) => createAnnotation(s)),
+    );
+    created += seeds.length;
+  }
+
+  return { created, skipped };
 }

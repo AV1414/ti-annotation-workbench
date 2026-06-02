@@ -131,7 +131,12 @@ export function ExportDialog({ taskId, stats }: ExportDialogProps) {
 
           {/* Preview */}
           <div className="space-y-2">
-            <Label className="text-sm font-medium">Preview (first 2 lines)</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">Preview (first 2 lines)</Label>
+              <span className="text-[11px] text-muted-foreground">
+                Compatible with HuggingFace TRL DPOTrainer and RewardTrainer
+              </span>
+            </div>
             <div className="relative rounded-lg border bg-muted/30 overflow-hidden">
               {isLoadingPreview ? (
                 <div className="flex items-center justify-center h-24">
