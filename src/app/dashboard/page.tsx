@@ -1,11 +1,13 @@
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
+import { Plus, LayoutGrid, MessageSquare, CheckCircle2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { listTasks, listAnnotationsByTask, getProgress } from '@/lib/repository';
 import { KpiCard } from './_components/KpiCard';
 import { ActivityChart } from './_components/ActivityChart';
 import { DashboardTaskTable } from './_components/DashboardTaskTable';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { PageHeader } from '@/components/layout/PageHeader';
 import type { Annotation, TaskProgress } from '@/lib/types';
 
 function fmt(n: number): string {
@@ -61,45 +63,47 @@ export default async function DashboardPage() {
   const activityData = buildActivityData(allAnnotations);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Operational health for your RLHF annotation pipeline
-        </p>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Dashboard"
+        description="Operational health for your RLHF annotation pipeline."
+      />
 
       {/* KPI cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6">
         <KpiCard
           title="Total Tasks"
           value={fmt(tasks.length)}
           sub={`${activeTasks.length} active · ${draftTasks.length} draft · ${completedTasks.length} completed`}
+          icon={<LayoutGrid className="size-4 text-primary" />}
         />
         <KpiCard
           title="Total Annotations"
           value={fmt(allAnnotations.length)}
           sub={`across ${uniqueAnnotators} annotator${uniqueAnnotators !== 1 ? 's' : ''}`}
+          icon={<MessageSquare className="size-4 text-primary" />}
         />
         <KpiCard
           title="Completion Rate"
           value={`${avgCompletionPct}%`}
           sub="average across active tasks"
           progress={avgCompletionPct}
+          icon={<CheckCircle2 className="size-4 text-primary" />}
         />
         <KpiCard
-          title="Avg Annotations / Prompt"
+          title="Avg / Prompt"
           value={avgAnnotationsPerPrompt}
-          sub="Higher = stronger inter-annotator signal"
+          sub="annotations per prompt"
           tooltip="Multiple annotations per prompt reduce noise in reward model training. Anthropic averaged ~3 labels per comparison in their HH dataset (Bai et al. 2022 §2)."
+          icon={<Users className="size-4 text-primary" />}
         />
       </div>
 
       {/* Activity chart */}
-      <Card>
+      <Card className="mb-6">
         <CardHeader>
           <CardTitle className="text-sm font-medium text-muted-foreground">
-            Annotations — last 14 days
+            Annotation activity — last 14 days
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -110,7 +114,7 @@ export default async function DashboardPage() {
       {/* Task table */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold">All Tasks</h2>
+          <h2 className="text-lg font-semibold tracking-tight">All Tasks</h2>
           <Button variant="outline" size="sm" asChild>
             <Link href="/admin/new"><Plus className="size-3.5" /> New Task</Link>
           </Button>
@@ -119,15 +123,15 @@ export default async function DashboardPage() {
         {tasks.length > 0 ? (
           <DashboardTaskTable tasks={tasks} progressMap={progressMap} />
         ) : (
-          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-20 text-center">
-            <p className="text-lg font-medium">No tasks yet</p>
+          <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-20 text-center bg-card">
+            <p className="text-base font-semibold">No tasks yet</p>
             <p className="mt-1 text-sm text-muted-foreground">Create your first annotation task to see data here.</p>
-            <Button className="mt-6" asChild>
+            <Button className="mt-6" size="sm" asChild>
               <Link href="/admin/new"><Plus className="size-4" /> Create your first task</Link>
             </Button>
           </div>
         )}
       </div>
-    </div>
+    </PageContainer>
   );
 }

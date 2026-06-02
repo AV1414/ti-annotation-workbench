@@ -37,31 +37,26 @@ export function AnnotatorIdentity() {
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border bg-card px-4 py-3">
+    <div className="flex items-center gap-2 h-9 px-3 rounded-md border border-border bg-card text-sm w-fit">
       <User className="size-4 shrink-0 text-muted-foreground" />
-      <span className="text-sm text-muted-foreground whitespace-nowrap">You&apos;re annotating as:</span>
+      <span className="text-muted-foreground whitespace-nowrap text-xs">Annotating as</span>
       {editing ? (
-        <form
-          onSubmit={(e) => { e.preventDefault(); save(); }}
-          className="flex items-center gap-2 flex-1"
-        >
+        <form onSubmit={(e) => { e.preventDefault(); save(); }} className="flex items-center gap-1.5">
           <Input
             ref={inputRef}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            className="h-7 text-sm"
+            className="h-6 text-xs border-0 shadow-none px-1 w-32 focus-visible:ring-0"
             autoFocus
           />
-          <Button type="submit" size="sm" className="h-7">Set</Button>
-          <Button type="button" variant="ghost" size="sm" className="h-7" onClick={() => setEditing(false)}>
-            Cancel
-          </Button>
+          <Button type="submit" size="xs">Save</Button>
+          <Button type="button" variant="ghost" size="xs" onClick={() => setEditing(false)}>✕</Button>
         </form>
       ) : (
         <button
           type="button"
           onClick={startEdit}
-          className="flex-1 text-left text-sm font-medium hover:text-primary transition-colors"
+          className="text-xs font-medium text-foreground hover:text-primary transition-colors"
         >
           {name || '…'}
         </button>

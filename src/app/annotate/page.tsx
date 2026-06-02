@@ -1,9 +1,11 @@
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
+import { Plus, ClipboardList } from 'lucide-react';
 import { listTasks, getProgress } from '@/lib/repository';
 import { AnnotatorIdentity } from '@/components/annotate/AnnotatorIdentity';
 import { TaskCard } from '@/components/annotate/TaskCard';
 import { Button } from '@/components/ui/button';
+import { PageContainer } from '@/components/layout/PageContainer';
+import { PageHeader } from '@/components/layout/PageHeader';
 
 export default async function AnnotatePage() {
   const allTasks = await listTasks();
@@ -14,33 +16,39 @@ export default async function AnnotatePage() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Available Annotation Tasks</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Pick a task to start labeling</p>
+    <PageContainer>
+      <PageHeader
+        title="Annotation Tasks"
+        description="Pick a task to start labeling. Each task uses a different RLHF methodology — try both to see how the rating interface adapts."
+      />
+
+      {/* Annotator identity */}
+      <div className="mb-6">
+        <AnnotatorIdentity />
       </div>
 
-      <AnnotatorIdentity />
-
       {activeTasks.length > 0 ? (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           {activeTasks.map((task, i) => (
             <TaskCard key={task.id} task={task} progress={progressList[i]} />
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-20 text-center">
-          <p className="text-lg font-medium">No active tasks</p>
-          <p className="mt-1 text-sm text-muted-foreground">
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border py-24 text-center bg-card">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+            <ClipboardList className="size-6 text-muted-foreground" />
+          </div>
+          <p className="text-base font-semibold text-foreground">No active tasks</p>
+          <p className="mt-1 text-sm text-muted-foreground max-w-sm">
             An admin needs to create and activate a task before you can annotate.
           </p>
-          <Button className="mt-6" variant="outline" asChild>
+          <Button className="mt-6" size="sm" asChild>
             <Link href="/admin/new">
               <Plus className="size-4" /> Create a task
             </Link>
           </Button>
         </div>
       )}
-    </div>
+    </PageContainer>
   );
 }

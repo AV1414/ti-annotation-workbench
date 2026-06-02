@@ -9,14 +9,6 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -41,34 +33,36 @@ function relativeTime(dateStr: string): string {
   return `${Math.floor(d / 30)}mo ago`;
 }
 
-const TASK_TYPE_LABELS: Record<Task['taskType'], string> = {
+const TYPE_LABEL: Record<Task['taskType'], string> = {
   preference: 'Preference',
   red_teaming: 'Red Teaming',
   rating: 'Rating',
 };
 
-const TASK_TYPE_VARIANT: Record<Task['taskType'], 'default' | 'danger' | 'info'> = {
-  preference: 'default',
+const TYPE_VARIANT: Record<Task['taskType'], 'info' | 'danger' | 'secondary'> = {
+  preference: 'info',
   red_teaming: 'danger',
-  rating: 'info',
+  rating: 'secondary',
 };
 
-const SCALE_LABELS: Record<Task['ratingScale'], string> = {
+const SCALE_LABEL: Record<Task['ratingScale'], string> = {
   binary: 'Binary',
   four_point: '4-point',
-  likert_7: 'Likert 7',
+  likert_7: 'Likert-7',
   custom: 'Custom',
 };
 
-const STATUS_VARIANT: Record<Task['status'], 'warning' | 'success' | 'danger'> = {
-  draft: 'warning',
+const STATUS_VARIANT: Record<Task['status'], 'success' | 'warning' | 'secondary'> = {
   active: 'success',
-  completed: 'danger',
+  draft: 'warning',
+  completed: 'secondary',
 };
 
 interface TaskTableProps {
   tasks: Task[];
 }
+
+const COL = 'grid grid-cols-[2fr_1fr_1fr_1.5fr_auto_1fr_1fr_auto] items-center gap-4 px-4';
 
 export function TaskTable({ tasks }: TaskTableProps) {
   const router = useRouter();
@@ -91,77 +85,79 @@ export function TaskTable({ tasks }: TaskTableProps) {
 
   return (
     <>
-      <div className="rounded-lg border overflow-x-auto">
-        <Table className="min-w-[700px]">
-          <TableHeader>
-            <TableRow>
-              <TableHead>Task</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Scale</TableHead>
-              <TableHead>Dimensions</TableHead>
-              <TableHead className="text-center">Prompts</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="w-[80px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {tasks.map((task) => (
-              <TableRow key={task.id}>
-                <TableCell>
-                  <div>
-                    <p className="font-medium text-sm">{task.name}</p>
-                    {task.description && (
-                      <p className="text-xs text-muted-foreground mt-0.5 max-w-[220px] truncate">
-                        {task.description}
-                      </p>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={TASK_TYPE_VARIANT[task.taskType]}>{TASK_TYPE_LABELS[task.taskType]}</Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="secondary">{SCALE_LABELS[task.ratingScale]}</Badge>
-                </TableCell>
-                <TableCell>
-                  <span className="text-sm text-muted-foreground">
-                    {task.dimensions.map((d) => d.label).join(', ')}
-                  </span>
-                </TableCell>
-                <TableCell className="text-center text-sm tabular-nums">
-                  {task.prompts.length}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={STATUS_VARIANT[task.status]} className="capitalize">
-                    {task.status}
-                  </Badge>
-                </TableCell>
-
-                <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                  {relativeTime(task.createdAt)}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/admin/${task.id}`} aria-label="Edit task">
-                        <Pencil className="size-4" />
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Delete task"
-                      onClick={() => setDeleteTarget(task)}
-                    >
-                      <Trash2 className="size-4 text-destructive" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
+      <div className="rounded-lg border border-border bg-card overflow-x-auto">
+        <div className="min-w-[780px]">
+          {/* Header */}
+          <div className={`${COL} h-10 bg-muted/50 border-b border-border`}>
+            {['Task', 'Type', 'Scale', 'Dimensions', 'Prompts', 'Status', 'Created', ''].map((h) => (
+              <span key={h} className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                {h}
+              </span>
             ))}
-          </TableBody>
-        </Table>
+          </div>
+
+          {/* Rows */}
+          {tasks.map((task) => (
+            <div
+              key={task.id}
+              className={`${COL} h-16 border-b border-border last:border-b-0 hover:bg-muted/30 transition-colors`}
+            >
+              {/* Task name + description */}
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate">{task.name}</p>
+                {task.description && (
+                  <p className="text-xs text-muted-foreground truncate mt-0.5">{task.description}</p>
+                )}
+              </div>
+
+              {/* Type */}
+              <Badge variant={TYPE_VARIANT[task.taskType]}>{TYPE_LABEL[task.taskType]}</Badge>
+
+              {/* Scale */}
+              <span className="font-mono text-xs px-2 py-0.5 bg-muted rounded text-muted-foreground w-fit">
+                {SCALE_LABEL[task.ratingScale]}
+              </span>
+
+              {/* Dimensions */}
+              <span className="text-xs text-muted-foreground truncate">
+                {task.dimensions.map((d) => d.label).join(' · ')}
+              </span>
+
+              {/* Prompts */}
+              <span className="text-sm font-semibold tabular-nums text-center">
+                {task.prompts.length}
+              </span>
+
+              {/* Status */}
+              <Badge variant={STATUS_VARIANT[task.status]} className="capitalize">
+                {task.status}
+              </Badge>
+
+              {/* Created */}
+              <span className="text-xs text-muted-foreground whitespace-nowrap">
+                {relativeTime(task.createdAt)}
+              </span>
+
+              {/* Actions */}
+              <div className="flex items-center gap-0.5">
+                <Button variant="ghost" size="icon-xs" asChild>
+                  <Link href={`/admin/${task.id}`} aria-label="Edit task">
+                    <Pencil className="size-3.5" />
+                  </Link>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  aria-label="Delete task"
+                  onClick={() => setDeleteTarget(task)}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="size-3.5" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>

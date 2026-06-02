@@ -5,33 +5,33 @@ import { Slot } from "radix-ui"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "group/badge inline-flex h-5 w-fit shrink-0 items-center justify-center gap-1 overflow-hidden rounded-4xl border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3!",
+  "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-colors",
   {
     variants: {
       variant: {
         default:
-          "bg-brand-primary-subtle text-brand-primary [a]:hover:bg-brand-primary-subtle/80",
+          "border-primary/20 bg-primary/10 text-primary",
         secondary:
-          "bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80",
-        destructive:
-          "bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20",
+          "border-transparent bg-secondary text-secondary-foreground",
         outline:
-          "border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
+          "border-border bg-transparent text-foreground",
         ghost:
-          "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
-        link: "text-primary underline-offset-4 hover:underline",
+          "border-transparent bg-transparent text-muted-foreground hover:bg-muted",
 
-        /* Semantic status variants */
+        /* Semantic status variants — uses CSS custom property pattern */
         success:
-          "bg-brand-success-subtle text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400",
+          "border-[hsl(var(--success))]/20 bg-[hsl(var(--success-bg))] text-[hsl(var(--success))]",
         warning:
-          "bg-brand-warning-subtle text-amber-700 dark:bg-amber-950/50 dark:text-amber-400",
+          "border-[hsl(var(--warning))]/20 bg-[hsl(var(--warning-bg))] text-[hsl(var(--warning))]",
         info:
-          "bg-brand-info-subtle text-sky-700 dark:bg-sky-950/50 dark:text-sky-400",
+          "border-[hsl(var(--info))]/20 bg-[hsl(var(--info-bg))] text-[hsl(var(--info))]",
         purple:
-          "bg-brand-purple-subtle text-violet-700 dark:bg-violet-950/50 dark:text-violet-400",
+          "border-[hsl(var(--purple))]/20 bg-[hsl(var(--purple-bg))] text-[hsl(var(--purple))]",
         danger:
-          "bg-brand-danger-subtle text-rose-700 dark:bg-rose-950/50 dark:text-rose-400",
+          "border-[hsl(var(--rose))]/20 bg-[hsl(var(--rose-bg))] text-[hsl(var(--rose))]",
+
+        destructive:
+          "border-destructive/20 bg-destructive/10 text-destructive",
       },
     },
     defaultVariants: {

@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
 interface PromptCardProps {
@@ -6,7 +5,6 @@ interface PromptCardProps {
   className?: string;
 }
 
-// Naively detect multi-turn format: lines starting with "User:" or "Assistant:"
 function parseTurns(text: string) {
   const turnRegex = /^(User|Assistant):\s*/m;
   if (!turnRegex.test(text)) return null;
@@ -24,11 +22,14 @@ export function PromptCard({ text, className }: PromptCardProps) {
   const turns = parseTurns(text);
 
   return (
-    <Card className={cn('border-border/60', className)}>
-      <CardHeader className="pb-0">
-        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Prompt</p>
-      </CardHeader>
-      <CardContent className="pt-2">
+    <div className={cn(
+      'rounded-lg border border-border bg-card shadow-sm border-l-4 border-l-primary',
+      className,
+    )}>
+      <div className="px-5 pt-4 pb-1">
+        <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Prompt</p>
+      </div>
+      <div className="px-5 pb-4">
         {turns ? (
           <div className="space-y-3">
             {turns.map((turn, i) => (
@@ -36,8 +37,8 @@ export function PromptCard({ text, className }: PromptCardProps) {
                 <span className={cn(
                   'mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide',
                   turn.role === 'User'
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300'
-                    : 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
+                    ? 'bg-[hsl(var(--info-bg))] text-[hsl(var(--info))]'
+                    : 'bg-[hsl(var(--purple-bg))] text-[hsl(var(--purple))]',
                 )}>
                   {turn.role}
                 </span>
@@ -48,7 +49,7 @@ export function PromptCard({ text, className }: PromptCardProps) {
         ) : (
           <p className="font-mono text-sm leading-relaxed whitespace-pre-wrap">{text}</p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

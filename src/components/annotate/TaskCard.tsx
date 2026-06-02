@@ -2,26 +2,25 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProgressBar } from './ProgressBar';
 import type { Task, TaskProgress } from '@/lib/types';
 
-const TYPE_COLORS: Record<Task['taskType'], string> = {
-  preference: 'bg-brand-primary-subtle text-indigo-700',
-  red_teaming: 'bg-brand-danger-subtle text-rose-700',
-  rating: 'bg-brand-info-subtle text-sky-700',
-};
-
-const TYPE_LABELS: Record<Task['taskType'], string> = {
+const TYPE_LABEL: Record<Task['taskType'], string> = {
   preference: 'Preference',
   red_teaming: 'Red Teaming',
   rating: 'Rating',
 };
 
-const SCALE_LABELS: Record<Task['ratingScale'], string> = {
+const TYPE_VARIANT: Record<Task['taskType'], 'info' | 'danger' | 'secondary'> = {
+  preference: 'info',
+  red_teaming: 'danger',
+  rating: 'secondary',
+};
+
+const SCALE_LABEL: Record<Task['ratingScale'], string> = {
   binary: 'Binary',
   four_point: '4-point',
-  likert_7: 'Likert 7',
+  likert_7: 'Likert-7',
   custom: 'Custom',
 };
 
@@ -42,58 +41,56 @@ interface TaskCardProps {
 
 export function TaskCard({ task, progress }: TaskCardProps) {
   const methodologyVariant = METHODOLOGY_VARIANT[task.ratingScale];
+  const sub = progress.totalAnnotations > 0
+    ? `${progress.totalAnnotations} annotation${progress.totalAnnotations !== 1 ? 's' : ''} · ${progress.uniqueAnnotators} reviewer${progress.uniqueAnnotators !== 1 ? 's' : ''}`
+    : undefined;
 
   return (
-    <Card className="flex flex-col transition-all hover:shadow-md hover:border-primary/20">
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-base leading-snug">{task.name}</CardTitle>
-        </div>
-        <div className="flex flex-wrap gap-1.5 mt-1">
-          {/* Methodology badge first — the platform story */}
+    <div className="flex flex-col rounded-lg border border-border bg-card shadow-sm transition-all duration-150 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5">
+      {/* Header */}
+      <div className="p-5 pb-3">
+        <div className="flex flex-wrap gap-1.5 mb-3">
           {methodologyVariant && METHODOLOGY_LABEL[task.ratingScale] && (
-            <Badge variant={methodologyVariant} className="text-[11px]">
-              {METHODOLOGY_LABEL[task.ratingScale]}
-            </Badge>
+            <Badge variant={methodologyVariant}>{METHODOLOGY_LABEL[task.ratingScale]}</Badge>
           )}
-          <span className={`inline-flex h-5 items-center rounded-full px-2 text-[11px] font-medium ${TYPE_COLORS[task.taskType]}`}>
-            {TYPE_LABELS[task.taskType]}
-          </span>
-          <Badge variant="secondary" className="text-[11px]">
-            {SCALE_LABELS[task.ratingScale]}
-          </Badge>
+          <Badge variant={TYPE_VARIANT[task.taskType]}>{TYPE_LABEL[task.taskType]}</Badge>
+          <Badge variant="secondary" className="font-mono">{SCALE_LABEL[task.ratingScale]}</Badge>
         </div>
-      </CardHeader>
-
-      <CardContent className="flex-1 flex flex-col gap-3">
+        <h3 className="text-base font-semibold leading-snug tracking-tight text-foreground">
+          {task.name}
+        </h3>
         {task.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2">{task.description}</p>
+          <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{task.description}</p>
         )}
+      </div>
 
-        <div className="flex flex-wrap gap-1">
-          {task.dimensions.map((d) => (
-            <Badge key={d.id} variant="outline" className="text-[10px]">{d.label}</Badge>
-          ))}
-        </div>
+      {/* Divider */}
+      <div className="border-t border-border/60 mx-5" />
 
+      {/* Stats */}
+      <div className="px-5 py-4 space-y-2.5">
+        {task.dimensions.length > 0 && (
+          <p className="text-xs text-muted-foreground">
+            {task.dimensions.map((d) => d.label).join(' · ')}
+          </p>
+        )}
         <ProgressBar
           current={progress.uniquePromptsAnnotated}
           total={progress.totalPrompts}
           pct={progress.completionPct}
           showLabel
-          sub={
-            progress.totalAnnotations > 0
-              ? `${progress.totalAnnotations} annotation${progress.totalAnnotations !== 1 ? 's' : ''} from ${progress.uniqueAnnotators} reviewer${progress.uniqueAnnotators !== 1 ? 's' : ''}`
-              : undefined
-          }
+          sub={sub}
         />
+      </div>
 
-        <Button asChild className="mt-auto w-full">
+      {/* Footer */}
+      <div className="px-5 py-4 pt-3 border-t border-border/60 bg-muted/30 mt-auto rounded-b-lg">
+        <Button asChild size="sm" className="w-full">
           <Link href={`/annotate/${task.id}`}>
-            Start Annotating <ArrowRight className="size-4" />
+            Start annotating <ArrowRight className="size-3.5" />
           </Link>
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

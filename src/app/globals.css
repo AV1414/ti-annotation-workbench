@@ -5,155 +5,134 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  /* Fonts — Inter as primary sans, Geist Mono for code */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-heading: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
-  /* Brand palette utilities */
-  --color-brand-primary: var(--brand-primary);
-  --color-brand-primary-subtle: var(--brand-primary-subtle);
-  --color-brand-success: var(--brand-success);
-  --color-brand-success-subtle: var(--brand-success-subtle);
-  --color-brand-warning: var(--brand-warning);
-  --color-brand-warning-subtle: var(--brand-warning-subtle);
-  --color-brand-info: var(--brand-info);
-  --color-brand-info-subtle: var(--brand-info-subtle);
-  --color-brand-danger: var(--brand-danger);
-  --color-brand-danger-subtle: var(--brand-danger-subtle);
-  --color-brand-purple: var(--brand-purple);
-  --color-brand-purple-subtle: var(--brand-purple-subtle);
-  --color-surface-subtle: var(--surface-subtle);
+  /* Core color mappings */
+  --color-background:       var(--background);
+  --color-foreground:       var(--foreground);
+  --color-card:             var(--card);
+  --color-card-foreground:  var(--card-foreground);
+  --color-popover:          var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary:          var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary:        var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:            var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent:           var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive:      var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border:           var(--border);
+  --color-input:            var(--input);
+  --color-ring:             var(--ring);
+
+  /* Semantic color utilities */
+  --color-success:          hsl(var(--success));
+  --color-success-bg:       hsl(var(--success-bg));
+  --color-warning:          hsl(var(--warning));
+  --color-warning-bg:       hsl(var(--warning-bg));
+  --color-info:             hsl(var(--info));
+  --color-info-bg:          hsl(var(--info-bg));
+  --color-purple:           hsl(var(--purple));
+  --color-purple-bg:        hsl(var(--purple-bg));
+  --color-rose:             hsl(var(--rose));
+  --color-rose-bg:          hsl(var(--rose-bg));
+  --color-surface-subtle:   var(--surface-subtle);
+
+  /* Chart colors */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Sidebar */
+  --color-sidebar:                    var(--sidebar);
+  --color-sidebar-foreground:         var(--sidebar-foreground);
+  --color-sidebar-primary:            var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent:             var(--sidebar-accent);
+  --color-sidebar-accent-foreground:  var(--sidebar-accent-foreground);
+  --color-sidebar-border:             var(--sidebar-border);
+  --color-sidebar-ring:               var(--sidebar-ring);
+
+  /* Radius */
+  --radius-sm:  calc(var(--radius) - 2px);
+  --radius-md:  var(--radius);
+  --radius-lg:  calc(var(--radius) + 2px);
+  --radius-xl:  calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  /* ── Surfaces ──────────────────────────────────────────────── */
+  --background:      hsl(0 0% 100%);
+  --foreground:      hsl(240 10% 10%);
+  --card:            hsl(0 0% 100%);
+  --card-foreground: hsl(240 10% 10%);
+  --popover:         hsl(0 0% 100%);
+  --popover-foreground: hsl(240 10% 10%);
 
-  /* Primary → indigo-500 */
-  --primary: oklch(0.585 0.233 264.376);
-  --primary-foreground: oklch(1 0 0);
+  /* ── Primary: deep indigo (Linear-inspired) ────────────────── */
+  --primary:          hsl(243 75% 58%);
+  --primary-foreground: hsl(0 0% 100%);
 
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.723 0.128 264.376);   /* indigo-300 for focus rings */
+  /* ── Secondary / muted ─────────────────────────────────────── */
+  --secondary:           hsl(240 5% 96%);
+  --secondary-foreground: hsl(240 10% 20%);
+  --muted:               hsl(240 5% 96%);
+  --muted-foreground:    hsl(240 5% 45%);
+  --accent:              hsl(240 5% 96%);
+  --accent-foreground:   hsl(240 10% 20%);
 
-  /* Chart colors — brand palette */
-  --chart-1: oklch(0.585 0.233 264.376);  /* indigo-500  */
-  --chart-2: oklch(0.606 0.250 292.717);  /* violet-500  */
-  --chart-3: oklch(0.685 0.169 237.323);  /* sky-500     */
-  --chart-4: oklch(0.696 0.170 162.480);  /* emerald-500 */
-  --chart-5: oklch(0.769 0.188 70.080);   /* amber-500   */
+  /* ── Destructive ───────────────────────────────────────────── */
+  --destructive:            hsl(350 89% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
 
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.585 0.233 264.376);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.723 0.128 264.376);
+  /* ── Borders / inputs ──────────────────────────────────────── */
+  --border: hsl(240 6% 90%);
+  --input:  hsl(240 6% 90%);
+  --ring:   hsl(243 75% 58%);
 
-  /* Brand color palette */
-  --brand-primary:        oklch(0.585 0.233 264.376);   /* indigo-500  */
-  --brand-primary-subtle: oklch(0.962 0.018 272.314);   /* indigo-50   */
-  --brand-success:        oklch(0.696 0.170 162.480);   /* emerald-500 */
-  --brand-success-subtle: oklch(0.979 0.021 166.113);   /* emerald-50  */
-  --brand-warning:        oklch(0.769 0.188 70.080);    /* amber-500   */
-  --brand-warning-subtle: oklch(0.987 0.022 95.277);    /* amber-50    */
-  --brand-info:           oklch(0.685 0.169 237.323);   /* sky-500     */
-  --brand-info-subtle:    oklch(0.977 0.013 236.620);   /* sky-50      */
-  --brand-danger:         oklch(0.645 0.246 16.439);    /* rose-500    */
-  --brand-danger-subtle:  oklch(0.969 0.015 12.422);    /* rose-50     */
-  --brand-purple:         oklch(0.606 0.250 292.717);   /* violet-500  */
-  --brand-purple-subtle:  oklch(0.969 0.016 293.756);   /* violet-50   */
+  /* ── Semantic colors (raw HSL for use in hsl(var(--x))) ────── */
+  --success:    160 84% 39%;
+  --success-bg: 152 81% 96%;
+  --warning:    38 92% 50%;
+  --warning-bg: 48 96% 95%;
+  --info:       199 89% 48%;
+  --info-bg:    204 94% 95%;
+  --purple:     271 76% 53%;
+  --purple-bg:  270 100% 96%;
+  --rose:       350 89% 60%;
+  --rose-bg:    355 100% 96%;
 
-  /* Page background — barely-off-white for visual lift on cards */
-  --surface-subtle: oklch(0.985 0.003 264);
-}
+  /* ── Page background (cards lift off this) ─────────────────── */
+  --surface-subtle: hsl(240 5% 98%);
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.673 0.182 264.376);   /* indigo-400 — lighter for dark mode */
-  --primary-foreground: oklch(0.145 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.585 0.233 264.376);
-  --chart-1: oklch(0.673 0.182 264.376);   /* indigo-400  */
-  --chart-2: oklch(0.714 0.203 292.717);   /* violet-400  */
-  --chart-3: oklch(0.765 0.147 237.323);   /* sky-400     */
-  --chart-4: oklch(0.765 0.142 162.480);   /* emerald-400 */
-  --chart-5: oklch(0.828 0.157 70.080);    /* amber-400   */
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.673 0.182 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.673 0.182 264.376);
-  --surface-subtle: oklch(0.17 0.01 264);
+  /* ── Charts ────────────────────────────────────────────────── */
+  --chart-1: hsl(243 75% 58%);   /* primary indigo */
+  --chart-2: hsl(271 76% 53%);   /* purple */
+  --chart-3: hsl(199 89% 48%);   /* sky */
+  --chart-4: hsl(160 84% 39%);   /* emerald */
+  --chart-5: hsl(38 92% 50%);    /* amber */
+
+  /* ── Radius ─────────────────────────────────────────────────── */
+  --radius: 0.5rem;
+
+  /* ── Sidebar ────────────────────────────────────────────────── */
+  --sidebar:                    hsl(240 5% 98%);
+  --sidebar-foreground:         hsl(240 10% 10%);
+  --sidebar-primary:            hsl(243 75% 58%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent:             hsl(240 5% 96%);
+  --sidebar-accent-foreground:  hsl(240 10% 20%);
+  --sidebar-border:             hsl(240 6% 90%);
+  --sidebar-ring:               hsl(243 75% 58%);
 }
 
 @layer base {
@@ -161,9 +140,17 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-surface-subtle text-foreground;
+    @apply text-foreground;
+    background-color: var(--surface-subtle);
+    font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   html {
     @apply font-sans;
+  }
+  /* Ensure no serif bleeds through */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
   }
 }

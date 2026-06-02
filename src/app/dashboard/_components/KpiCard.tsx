@@ -1,47 +1,41 @@
 import { Info } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 
 interface KpiCardProps {
   title: string;
   value: string | number;
   sub?: string;
   tooltip?: string;
-  progress?: number; // 0–100
+  progress?: number;
+  icon?: React.ReactNode;
 }
 
-export function KpiCard({ title, value, sub, tooltip, progress }: KpiCardProps) {
+export function KpiCard({ title, value, sub, tooltip, progress, icon }: KpiCardProps) {
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-1.5">
-          <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+      <CardContent className="pt-5">
+        <div className="flex items-start justify-between gap-2 mb-3">
+          {icon && (
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 shrink-0">
+              {icon}
+            </div>
+          )}
           {tooltip && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className="text-muted-foreground/60 hover:text-muted-foreground">
-                    <Info className="size-3.5" />
-                    <span className="sr-only">More info</span>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-64 text-xs">{tooltip}</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <button
+              className="ml-auto text-muted-foreground/50 hover:text-muted-foreground"
+              title={tooltip}
+              aria-label="More info"
+            >
+              <Info className="size-3.5" />
+            </button>
           )}
         </div>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <p className="text-3xl font-bold tracking-tight tabular-nums">{value}</p>
-        {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">{title}</p>
+        <p className="text-2xl font-semibold tabular-nums tracking-tight">{value}</p>
+        {sub && <p className="mt-1 text-xs text-muted-foreground">{sub}</p>}
         {progress !== undefined && (
-          <Progress value={progress} className="h-1.5" />
+          <Progress value={progress} className="mt-3 h-1" />
         )}
       </CardContent>
     </Card>

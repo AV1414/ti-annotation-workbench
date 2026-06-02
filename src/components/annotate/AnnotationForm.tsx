@@ -344,6 +344,7 @@ export function AnnotationForm({ task, allAnnotations: initialAnnotations }: Ann
                     <ResponseCard
                       key={r.id}
                       label={`Response ${idx === 0 ? 'A' : 'B'}`}
+                      side={idx === 0 ? 'A' : 'B'}
                       text={r.text}
                       showSource={showSources}
                       sourceLabel={r.model}
