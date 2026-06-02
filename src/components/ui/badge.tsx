@@ -9,7 +9,8 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
+        default:
+          "bg-brand-primary-subtle text-brand-primary [a]:hover:bg-brand-primary-subtle/80",
         secondary:
           "bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80",
         destructive:
@@ -19,6 +20,18 @@ const badgeVariants = cva(
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",
+
+        /* Semantic status variants */
+        success:
+          "bg-brand-success-subtle text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400",
+        warning:
+          "bg-brand-warning-subtle text-amber-700 dark:bg-amber-950/50 dark:text-amber-400",
+        info:
+          "bg-brand-info-subtle text-sky-700 dark:bg-sky-950/50 dark:text-sky-400",
+        purple:
+          "bg-brand-purple-subtle text-violet-700 dark:bg-violet-950/50 dark:text-violet-400",
+        danger:
+          "bg-brand-danger-subtle text-rose-700 dark:bg-rose-950/50 dark:text-rose-400",
       },
     },
     defaultVariants: {

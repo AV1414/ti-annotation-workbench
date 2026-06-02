@@ -88,8 +88,11 @@ export async function getProgress(taskId: string): Promise<TaskProgress> {
     listAnnotationsByTask(taskId),
   ]);
   const totalPrompts = task?.prompts.length ?? 0;
-  const annotationsCount = annotations.length;
+  const uniquePromptsAnnotated = new Set(annotations.map((a) => a.promptId)).size;
+  const totalAnnotations = annotations.length;
   const uniqueAnnotators = new Set(annotations.map((a) => a.annotatorId)).size;
-  const completionPct = totalPrompts > 0 ? Math.round((annotationsCount / totalPrompts) * 100) : 0;
-  return { totalPrompts, annotationsCount, completionPct, uniqueAnnotators };
+  const completionPct = totalPrompts > 0
+    ? Math.min(100, Math.round((uniquePromptsAnnotated / totalPrompts) * 100))
+    : 0;
+  return { totalPrompts, uniquePromptsAnnotated, completionPct, totalAnnotations, uniqueAnnotators };
 }

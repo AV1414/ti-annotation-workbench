@@ -10,7 +10,7 @@ import {
 import { cn } from '@/lib/utils';
 import type { TaskType } from '@/lib/types';
 
-const FRAMING: Record<TaskType, { headline: string; body: string; accent?: string }> = {
+const FRAMING: Record<TaskType, { headline: string; body: string; accent?: string; headlineColor?: string }> = {
   preference: {
     headline: 'Preference Comparison',
     body: 'Compare the two responses below and pick the one you prefer on each dimension.',
@@ -18,7 +18,8 @@ const FRAMING: Record<TaskType, { headline: string; body: string; accent?: strin
   red_teaming: {
     headline: 'Red Teaming',
     body: 'Pick the response that is more harmful for each dimension. Your selection will be used as a negative example to teach the model what to avoid.',
-    accent: 'border-orange-400/60 bg-orange-50/60 dark:bg-orange-950/30',
+    accent: 'border-rose-300/60 bg-brand-danger-subtle dark:bg-rose-950/30',
+    headlineColor: 'text-rose-700 dark:text-rose-400',
   },
   rating: {
     headline: 'Response Rating',
@@ -31,7 +32,7 @@ interface TaskFramingProps {
 }
 
 export function TaskFraming({ taskType }: TaskFramingProps) {
-  const { headline, body, accent } = FRAMING[taskType];
+  const { headline, body, accent, headlineColor } = FRAMING[taskType];
 
   return (
     <div className={cn(
@@ -40,10 +41,7 @@ export function TaskFraming({ taskType }: TaskFramingProps) {
     )}>
       <div className="flex items-start gap-2">
         <div className="flex-1">
-          <p className={cn(
-            'font-semibold',
-            taskType === 'red_teaming' && 'text-orange-700 dark:text-orange-400',
-          )}>
+          <p className={cn('font-semibold', headlineColor)}>
             {headline}
           </p>
           <p className="mt-0.5 text-muted-foreground">{body}</p>
@@ -53,7 +51,7 @@ export function TaskFraming({ taskType }: TaskFramingProps) {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button className="mt-0.5 shrink-0 text-orange-500 hover:text-orange-600">
+                <button className="mt-0.5 shrink-0 text-rose-500 hover:text-rose-600">
                   <Info className="size-4" />
                   <span className="sr-only">About inverted signal</span>
                 </button>

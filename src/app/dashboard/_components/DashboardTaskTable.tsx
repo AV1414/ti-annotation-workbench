@@ -26,6 +26,12 @@ const TYPE_LABELS: Record<Task['taskType'], string> = {
   rating: 'Rating',
 };
 
+const TYPE_VARIANT: Record<Task['taskType'], 'default' | 'danger' | 'info'> = {
+  preference: 'default',
+  red_teaming: 'danger',
+  rating: 'info',
+};
+
 const SCALE_LABELS: Record<Task['ratingScale'], string> = {
   binary: 'Binary',
   four_point: '4-point',
@@ -33,10 +39,10 @@ const SCALE_LABELS: Record<Task['ratingScale'], string> = {
   custom: 'Custom',
 };
 
-const STATUS_VARIANT: Record<Task['status'], 'outline' | 'secondary' | 'default'> = {
-  draft: 'outline',
-  active: 'default',
-  completed: 'secondary',
+const STATUS_VARIANT: Record<Task['status'], 'warning' | 'success' | 'danger'> = {
+  draft: 'warning',
+  active: 'success',
+  completed: 'danger',
 };
 
 interface DashboardTaskTableProps {
@@ -67,8 +73,9 @@ export function DashboardTaskTable({ tasks, progressMap }: DashboardTaskTablePro
           {tasks.map((task) => {
             const progress = progressMap[task.id] ?? {
               totalPrompts: task.prompts.length,
-              annotationsCount: 0,
+              uniquePromptsAnnotated: 0,
               completionPct: 0,
+              totalAnnotations: 0,
               uniqueAnnotators: 0,
             };
 
@@ -89,10 +96,10 @@ export function DashboardTaskTable({ tasks, progressMap }: DashboardTaskTablePro
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline">{TYPE_LABELS[task.taskType]}</Badge>
+                  <Badge variant={TYPE_VARIANT[task.taskType]}>{TYPE_LABELS[task.taskType]}</Badge>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="secondary">{SCALE_LABELS[task.ratingScale]}</Badge>
+                  <Badge variant="outline">{SCALE_LABELS[task.ratingScale]}</Badge>
                 </TableCell>
                 <TableCell>
                   <span className="text-sm text-muted-foreground">
@@ -100,11 +107,11 @@ export function DashboardTaskTable({ tasks, progressMap }: DashboardTaskTablePro
                   </span>
                 </TableCell>
                 <TableCell className="text-center tabular-nums">{task.prompts.length}</TableCell>
-                <TableCell className="text-center tabular-nums">{progress.annotationsCount}</TableCell>
+                <TableCell className="text-center tabular-nums">{progress.totalAnnotations}</TableCell>
                 <TableCell>
                   <div className="space-y-1 min-w-[120px]">
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>{progress.annotationsCount} / {progress.totalPrompts}</span>
+                      <span>{progress.uniquePromptsAnnotated} / {progress.totalPrompts}</span>
                       <span>{progress.completionPct}%</span>
                     </div>
                     <Progress value={progress.completionPct} className="h-1.5" />
@@ -115,6 +122,7 @@ export function DashboardTaskTable({ tasks, progressMap }: DashboardTaskTablePro
                     {task.status}
                   </Badge>
                 </TableCell>
+
                 <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                   {relativeTime(task.createdAt)}
                 </TableCell>

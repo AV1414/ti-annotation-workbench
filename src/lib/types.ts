@@ -58,7 +58,11 @@ export interface Annotator {
 
 export interface TaskProgress {
   totalPrompts: number;
-  annotationsCount: number;
+  /** Prompts that have ≥1 annotation from any annotator — the coverage metric. */
+  uniquePromptsAnnotated: number;
+  /** Capped at 100. Use this for progress bars. */
   completionPct: number;
+  /** Raw annotation count across all annotators — the depth metric. */
+  totalAnnotations: number;
   uniqueAnnotators: number;
 }

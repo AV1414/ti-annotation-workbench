@@ -8,19 +8,20 @@ import type { Annotation, Dimension, RatingChoice, RatingScale, Task } from '@/l
 
 // ── Color palette for choice buckets ──────────────────────────────────────
 
+// Brand palette: indigo for A-side, violet for B-side, gray for neutral/skip
 const COLORS: Record<string, string> = {
-  'A (sig. better)':  '#3b82f6',
-  'A (better)':       '#60a5fa',
-  'A (slight)':       '#93c5fd',
-  'Tie':              '#9ca3af',
-  'Negligible':       '#9ca3af',
-  'B (slight)':       '#86efac',
-  'B (better)':       '#4ade80',
-  'B (sig. better)':  '#16a34a',
-  'Response A':       '#3b82f6',
-  'Response B':       '#16a34a',
-  'Both Bad':         '#ef4444',
-  'Skip':             '#e5e7eb',
+  'A (sig. better)':  'oklch(0.457 0.240 281.087)',   /* indigo-700 */
+  'A (better)':       'oklch(0.585 0.233 264.376)',   /* indigo-500 */
+  'A (slight)':       'oklch(0.723 0.128 264.376)',   /* indigo-300 */
+  'Tie':              'oklch(0.708 0 0)',              /* gray-400   */
+  'Negligible':       'oklch(0.708 0 0)',
+  'B (slight)':       'oklch(0.714 0.203 292.717)',   /* violet-400 */
+  'B (better)':       'oklch(0.606 0.250 292.717)',   /* violet-500 */
+  'B (sig. better)':  'oklch(0.491 0.270 292.581)',   /* violet-700 */
+  'Response A':       'oklch(0.585 0.233 264.376)',   /* indigo-500 */
+  'Response B':       'oklch(0.606 0.250 292.717)',   /* violet-500 */
+  'Both Bad':         'oklch(0.645 0.246 16.439)',    /* rose-500   */
+  'Skip':             'oklch(0.922 0 0)',              /* gray-200   */
 };
 
 // ── Bucket definitions per scale ──────────────────────────────────────────

@@ -39,17 +39,18 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
   if (!task) notFound();
 
   const uniqueAnnotators = new Set(annotations.map((a) => a.annotatorId)).size;
+  const uniquePromptsAnnotated = new Set(annotations.map((a) => a.promptId)).size;
   const totalPrompts = task.prompts.length;
   const completionPct = totalPrompts > 0
-    ? Math.round((annotations.length / totalPrompts) * 100)
+    ? Math.min(100, Math.round((uniquePromptsAnnotated / totalPrompts) * 100))
     : 0;
 
   const exportStats = computeExportStats(task, annotations);
 
-  const STATUS_VARIANT: Record<string, 'outline' | 'secondary' | 'default'> = {
-    draft: 'outline',
-    active: 'default',
-    completed: 'secondary',
+  const STATUS_VARIANT: Record<string, 'warning' | 'success' | 'danger'> = {
+    draft: 'warning',
+    active: 'success',
+    completed: 'danger',
   };
 
   return (
@@ -111,7 +112,7 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
         <KpiCard
           title="Completion"
           value={`${completionPct}%`}
-          sub={`${annotations.length} / ${totalPrompts} prompts annotated`}
+          sub={`${uniquePromptsAnnotated} / ${totalPrompts} prompts covered · ${annotations.length} total annotations`}
           progress={completionPct}
         />
       </div>

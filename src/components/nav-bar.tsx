@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -15,24 +14,27 @@ export function NavBar() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-4">
-        <span className="text-sm font-semibold tracking-tight">
+    <header className="sticky top-0 z-50 border-b bg-background shadow-sm">
+      <div className="mx-auto flex h-14 max-w-7xl items-center px-4">
+        <span className="mr-6 text-sm font-bold tracking-tight text-primary">
           TI Annotation Workbench
         </span>
-        <nav className="flex items-center gap-1">
+        <nav className="flex h-full items-stretch -mb-px">
           {navLinks.map(({ href, label }) => {
             const isActive = pathname === href || pathname.startsWith(`${href}/`);
             return (
-              <Button
+              <Link
                 key={href}
-                variant={isActive ? "secondary" : "ghost"}
-                size="sm"
-                asChild
-                className={cn(isActive && "font-medium")}
+                href={href}
+                className={cn(
+                  "flex items-center border-b-2 px-4 text-sm font-medium transition-colors",
+                  isActive
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground hover:border-border",
+                )}
               >
-                <Link href={href}>{label}</Link>
-              </Button>
+                {label}
+              </Link>
             );
           })}
         </nav>

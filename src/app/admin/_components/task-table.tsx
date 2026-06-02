@@ -47,6 +47,12 @@ const TASK_TYPE_LABELS: Record<Task['taskType'], string> = {
   rating: 'Rating',
 };
 
+const TASK_TYPE_VARIANT: Record<Task['taskType'], 'default' | 'danger' | 'info'> = {
+  preference: 'default',
+  red_teaming: 'danger',
+  rating: 'info',
+};
+
 const SCALE_LABELS: Record<Task['ratingScale'], string> = {
   binary: 'Binary',
   four_point: '4-point',
@@ -54,10 +60,10 @@ const SCALE_LABELS: Record<Task['ratingScale'], string> = {
   custom: 'Custom',
 };
 
-const STATUS_VARIANT: Record<Task['status'], 'outline' | 'secondary' | 'default'> = {
-  draft: 'outline',
-  active: 'default',
-  completed: 'secondary',
+const STATUS_VARIANT: Record<Task['status'], 'warning' | 'success' | 'danger'> = {
+  draft: 'warning',
+  active: 'success',
+  completed: 'danger',
 };
 
 interface TaskTableProps {
@@ -113,7 +119,7 @@ export function TaskTable({ tasks }: TaskTableProps) {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline">{TASK_TYPE_LABELS[task.taskType]}</Badge>
+                  <Badge variant={TASK_TYPE_VARIANT[task.taskType]}>{TASK_TYPE_LABELS[task.taskType]}</Badge>
                 </TableCell>
                 <TableCell>
                   <Badge variant="secondary">{SCALE_LABELS[task.ratingScale]}</Badge>
@@ -131,6 +137,7 @@ export function TaskTable({ tasks }: TaskTableProps) {
                     {task.status}
                   </Badge>
                 </TableCell>
+
                 <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                   {relativeTime(task.createdAt)}
                 </TableCell>

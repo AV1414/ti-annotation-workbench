@@ -52,7 +52,7 @@ export default async function DashboardPage() {
 
   const totalPromptsActive = activeTasks.reduce((sum, t) => sum + t.prompts.length, 0);
   const totalAnnotationsActive = activeTasks.reduce(
-    (sum, t) => sum + (progressMap[t.id]?.annotationsCount ?? 0), 0
+    (sum, t) => sum + (progressMap[t.id]?.totalAnnotations ?? 0), 0
   );
   const avgAnnotationsPerPrompt = totalPromptsActive > 0
     ? (totalAnnotationsActive / totalPromptsActive).toFixed(1)

@@ -9,6 +9,8 @@ import { toast } from 'sonner';
 import { Plus, Trash2, Loader2, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
+import { cn } from '@/lib/utils';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -104,10 +106,26 @@ export type TaskFormValues = z.infer<typeof taskFormSchema>;
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 const QUICK_DIMENSIONS = [
-  { label: 'Helpfulness', description: "How well does the response address the user's request?" },
-  { label: 'Safety', description: 'Does the response avoid harmful or dangerous content?' },
-  { label: 'Factuality', description: 'Is the information accurate and well-grounded?' },
-  { label: 'Conciseness', description: 'Is the response appropriately brief without losing substance?' },
+  {
+    label: 'Helpfulness',
+    description: "How well does the response address the user's request?",
+    color: 'border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 disabled:opacity-40',
+  },
+  {
+    label: 'Safety',
+    description: 'Does the response avoid harmful or dangerous content?',
+    color: 'border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100 disabled:opacity-40',
+  },
+  {
+    label: 'Factuality',
+    description: 'Is the information accurate and well-grounded?',
+    color: 'border-sky-300 bg-sky-50 text-sky-700 hover:bg-sky-100 disabled:opacity-40',
+  },
+  {
+    label: 'Conciseness',
+    description: 'Is the response appropriately brief without losing substance?',
+    color: 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:opacity-40',
+  },
 ];
 
 function taskToFormValues(task: Task): TaskFormValues {
@@ -480,17 +498,18 @@ export function TaskForm({ task, hasApiKey = false }: TaskFormProps) {
             <div className="flex flex-wrap gap-2">
               <p className="text-xs text-muted-foreground self-center mr-1">Quick-add:</p>
               {QUICK_DIMENSIONS.map((dim) => (
-                <Button
+                <button
                   key={dim.label}
                   type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs"
+                  className={cn(
+                    'inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+                    dim.color,
+                  )}
                   disabled={dimensionFields.some((f) => f.label.toLowerCase() === dim.label.toLowerCase())}
                   onClick={() => addQuickDimension(dim)}
                 >
                   <Plus className="size-3" /> {dim.label}
-                </Button>
+                </button>
               ))}
             </div>
             <Separator />

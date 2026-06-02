@@ -57,10 +57,10 @@ export function ActivityChart({ data }: ActivityChartProps) {
         <Line
           type="monotone"
           dataKey="count"
-          stroke="hsl(0 0% 20%)"
-          strokeWidth={2}
+          stroke="oklch(0.585 0.233 264.376)"
+          strokeWidth={2.5}
           dot={false}
-          activeDot={{ r: 4 }}
+          activeDot={{ r: 4, fill: 'oklch(0.585 0.233 264.376)' }}
         />
       </LineChart>
     </ResponsiveContainer>

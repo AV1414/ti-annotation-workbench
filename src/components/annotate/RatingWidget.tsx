@@ -22,30 +22,26 @@ interface SubWidgetProps {
 
 // ── Utility ───────────────────────────────────────────────────────────────
 
-function PillButton({
+function GhostPill({
   active,
   onClick,
   children,
   className,
-  variant = 'primary',
 }: {
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
   className?: string;
-  variant?: 'primary' | 'ghost';
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cn(
-        'inline-flex items-center justify-center rounded-full border px-3 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        'inline-flex items-center justify-center rounded-full border px-3 py-1.5 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         active
-          ? 'border-primary bg-primary text-primary-foreground shadow-sm'
-          : variant === 'ghost'
-          ? 'border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground'
-          : 'border-border bg-background text-foreground hover:border-primary/40 hover:bg-primary/5',
+          ? 'border-muted-foreground/40 bg-muted text-foreground'
+          : 'border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground',
         className,
       )}
     >
@@ -54,7 +50,7 @@ function PillButton({
   );
 }
 
-// ── Binary rater ──────────────────────────────────────────────────────────
+// ── Binary rater — sky-colored large pills ────────────────────────────────
 
 function BinaryRater({ value, onChange, taskType }: SubWidgetProps) {
   const aLabel = taskType === 'red_teaming' ? 'Response A (more harmful)' : 'Response A';
@@ -66,18 +62,37 @@ function BinaryRater({ value, onChange, taskType }: SubWidgetProps) {
 
   return (
     <div className="space-y-3">
+      {/* Main A/B choices — large, sky-tinted pills */}
       <div className="flex flex-wrap gap-2">
-        <PillButton active={value?.choice === 'A'} onClick={() => pick('A')} className="flex-1 sm:flex-none">
+        <button
+          type="button"
+          onClick={() => pick('A')}
+          className={cn(
+            'flex-1 sm:flex-none inline-flex items-center justify-center rounded-full border-2 px-5 py-2 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            value?.choice === 'A'
+              ? 'border-brand-info bg-brand-info text-white shadow-sm'
+              : 'border-brand-info/40 bg-brand-info-subtle text-sky-700 hover:border-brand-info hover:bg-brand-info/10',
+          )}
+        >
           {aLabel}
-        </PillButton>
-        <PillButton active={value?.choice === 'B'} onClick={() => pick('B')} className="flex-1 sm:flex-none">
+        </button>
+        <button
+          type="button"
+          onClick={() => pick('B')}
+          className={cn(
+            'flex-1 sm:flex-none inline-flex items-center justify-center rounded-full border-2 px-5 py-2 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+            value?.choice === 'B'
+              ? 'border-brand-info bg-brand-info text-white shadow-sm'
+              : 'border-brand-info/40 bg-brand-info-subtle text-sky-700 hover:border-brand-info hover:bg-brand-info/10',
+          )}
+        >
           {bLabel}
-        </PillButton>
+        </button>
       </div>
       <div className="flex flex-wrap gap-2">
-        <PillButton active={value?.choice === 'tie'} onClick={() => pick('tie')} variant="ghost">Tie</PillButton>
-        <PillButton active={value?.choice === 'both_bad'} onClick={() => pick('both_bad')} variant="ghost">Both Bad</PillButton>
-        <PillButton active={value?.choice === 'skip'} onClick={() => pick('skip')} variant="ghost">Skip</PillButton>
+        <GhostPill active={value?.choice === 'tie'} onClick={() => pick('tie')}>Tie</GhostPill>
+        <GhostPill active={value?.choice === 'both_bad'} onClick={() => pick('both_bad')}>Both Bad</GhostPill>
+        <GhostPill active={value?.choice === 'skip'} onClick={() => pick('skip')}>Skip</GhostPill>
       </div>
     </div>
   );
@@ -109,37 +124,19 @@ export function fourPointPosToValue(pos: FourPointPos): RatingValue {
   return { choice: p.choice, strength: p.strength };
 }
 
-function SegmentedControl({
-  positions,
-  activeIndex,
-  onSelect,
-  className,
-}: {
-  positions: readonly { label: string }[];
-  activeIndex: number | null;
-  onSelect: (i: number) => void;
-  className?: string;
-}) {
-  return (
-    <div className={cn('flex overflow-x-auto rounded-lg border bg-muted/30', className)}>
-      {positions.map((pos, i) => (
-        <button
-          key={i}
-          type="button"
-          onClick={() => onSelect(i)}
-          className={cn(
-            'flex-1 min-w-[60px] border-r last:border-r-0 px-2 py-2 text-center text-[11px] leading-tight font-medium transition-colors whitespace-pre-line',
-            activeIndex === i
-              ? 'bg-primary text-primary-foreground'
-              : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-          )}
-        >
-          {pos.label}
-        </button>
-      ))}
-    </div>
-  );
-}
+// Color for each position: indigo for A-side, neutral for tie, violet for B-side
+const SEGMENT_COLORS = [
+  // A-side (0-2): indigo, darkest → lightest
+  { inactive: 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100', active: 'bg-indigo-600 text-white' },
+  { inactive: 'bg-indigo-50 text-indigo-500 hover:bg-indigo-100', active: 'bg-indigo-500 text-white' },
+  { inactive: 'bg-indigo-50 text-indigo-400 hover:bg-indigo-100', active: 'bg-indigo-400 text-white' },
+  // Tie (3): neutral gray
+  { inactive: 'bg-muted text-muted-foreground hover:bg-muted/80', active: 'bg-muted-foreground/20 text-foreground' },
+  // B-side (4-6): violet, lightest → darkest
+  { inactive: 'bg-violet-50 text-violet-400 hover:bg-violet-100', active: 'bg-violet-400 text-white' },
+  { inactive: 'bg-violet-50 text-violet-500 hover:bg-violet-100', active: 'bg-violet-500 text-white' },
+  { inactive: 'bg-violet-50 text-violet-600 hover:bg-violet-100', active: 'bg-violet-600 text-white' },
+];
 
 function FourPointRater({ value, onChange }: SubWidgetProps) {
   const activeIndex = valueToFourPointPos(value);
@@ -155,17 +152,31 @@ function FourPointRater({ value, onChange }: SubWidgetProps) {
 
   return (
     <div className="space-y-3">
-      <SegmentedControl
-        positions={FOUR_POINT_POSITIONS}
-        activeIndex={activeIndex}
-        onSelect={handleSegment}
-      />
+      <div className="flex overflow-x-auto rounded-lg border bg-background">
+        {FOUR_POINT_POSITIONS.map((pos, i) => {
+          const colors = SEGMENT_COLORS[i];
+          const isActive = activeIndex === i;
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => handleSegment(i)}
+              className={cn(
+                'flex-1 min-w-[56px] border-r last:border-r-0 px-2 py-2.5 text-center text-[11px] leading-tight font-medium transition-colors whitespace-pre-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50',
+                isActive ? colors.active : colors.inactive,
+              )}
+            >
+              {pos.label}
+            </button>
+          );
+        })}
+      </div>
       <p className="text-[10px] text-muted-foreground">
         Strength of preference is exported as a margin term for reward model training (Touvron et al. 2023, §3.2.2, Eq. 2).
       </p>
       <div className="flex gap-2">
-        <PillButton active={value?.choice === 'both_bad'} onClick={() => pick('both_bad')} variant="ghost">Both Bad</PillButton>
-        <PillButton active={value?.choice === 'skip'} onClick={() => pick('skip')} variant="ghost">Skip</PillButton>
+        <GhostPill active={value?.choice === 'both_bad'} onClick={() => pick('both_bad')}>Both Bad</GhostPill>
+        <GhostPill active={value?.choice === 'skip'} onClick={() => pick('skip')}>Skip</GhostPill>
       </div>
     </div>
   );
@@ -193,7 +204,6 @@ const LIKERT_7_RATING = [
   { label: '7\nBest' },
 ] as const;
 
-// Map Likert 7 preference positions to RatingValue (same schema as 4-point)
 const LIKERT_PREF_TO_VALUE: RatingValue[] = [
   { choice: 'A', strength: 'significantly' },
   { choice: 'A', strength: 'better' },
@@ -204,15 +214,14 @@ const LIKERT_PREF_TO_VALUE: RatingValue[] = [
   { choice: 'B', strength: 'significantly' },
 ];
 
-// For rating tasks: map score 1-7 to choice=A, strength encodes level
 const LIKERT_RATING_TO_VALUE: RatingValue[] = [
-  { choice: 'both_bad', strength: null },      // 1 = worst
-  { choice: 'skip', strength: null },           // 2
-  { choice: 'tie', strength: 'negligibly' },    // 3
-  { choice: 'tie', strength: null },            // 4 = neutral
-  { choice: 'A', strength: 'slightly' },        // 5
-  { choice: 'A', strength: 'better' },          // 6
-  { choice: 'A', strength: 'significantly' },   // 7 = best
+  { choice: 'both_bad', strength: null },
+  { choice: 'skip', strength: null },
+  { choice: 'tie', strength: 'negligibly' },
+  { choice: 'tie', strength: null },
+  { choice: 'A', strength: 'slightly' },
+  { choice: 'A', strength: 'better' },
+  { choice: 'A', strength: 'significantly' },
 ];
 
 function Likert7Rater({ value, onChange, taskType }: SubWidgetProps) {
@@ -229,21 +238,33 @@ function Likert7Rater({ value, onChange, taskType }: SubWidgetProps) {
   };
 
   return (
-    <SegmentedControl
-      positions={positions}
-      activeIndex={activeIndex === -1 ? null : activeIndex}
-      onSelect={handleSegment}
-    />
+    <div className="flex overflow-x-auto rounded-lg border bg-background">
+      {positions.map((pos, i) => {
+        const colors = SEGMENT_COLORS[i] ?? SEGMENT_COLORS[3];
+        const isActive = activeIndex === i;
+        return (
+          <button
+            key={i}
+            type="button"
+            onClick={() => handleSegment(i)}
+            className={cn(
+              'flex-1 min-w-[60px] border-r last:border-r-0 px-2 py-2.5 text-center text-[11px] leading-tight font-medium transition-colors whitespace-pre-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50',
+              isActive ? colors.active : colors.inactive,
+            )}
+          >
+            {pos.label}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
 // ── Custom scale ──────────────────────────────────────────────────────────
 
-// Maps up to N custom labels to reasonable RatingValues
 function labelIndexToValue(i: number, total: number): RatingValue {
   if (total === 1) return { choice: 'A', strength: null };
   if (total === 2) return i === 0 ? { choice: 'A', strength: null } : { choice: 'B', strength: null };
-  // For 3+: spread across A-strongly → tie → B-strongly
   const pos = Math.round((i / (total - 1)) * 6) as FourPointPos;
   return fourPointPosToValue(pos);
 }
@@ -252,27 +273,36 @@ function CustomScaleRater({ value, onChange, customScale }: SubWidgetProps) {
   const labels = customScale ?? [];
   if (!labels.length) return <p className="text-sm text-muted-foreground">No scale labels configured.</p>;
 
-  const positions = labels.map((l) => ({ label: l }));
   const valueMap = labels.map((_, i) => labelIndexToValue(i, labels.length));
-
   const activeIndex = valueMap.findIndex(
     (v) => v && value && v.choice === value.choice && v.strength === value.strength,
   );
 
-  const handleSegment = (i: number) => {
-    onChange(activeIndex === i ? null : valueMap[i]);
-  };
-
   return (
-    <SegmentedControl
-      positions={positions}
-      activeIndex={activeIndex === -1 ? null : activeIndex}
-      onSelect={handleSegment}
-    />
+    <div className="flex overflow-x-auto rounded-lg border bg-muted/30">
+      {labels.map((label, i) => {
+        const isActive = activeIndex === i;
+        return (
+          <button
+            key={i}
+            type="button"
+            onClick={() => onChange(activeIndex === i ? null : valueMap[i])}
+            className={cn(
+              'flex-1 min-w-[60px] border-r last:border-r-0 px-2 py-2 text-center text-[11px] leading-tight font-medium transition-colors whitespace-pre-line',
+              isActive
+                ? 'bg-primary text-primary-foreground'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+            )}
+          >
+            {label}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
-// ── Widget map — the config-driven dispatch ───────────────────────────────
+// ── Widget map ────────────────────────────────────────────────────────────
 
 const WIDGET_MAP: Record<RatingScale, ComponentType<SubWidgetProps>> = {
   binary:     BinaryRater,
