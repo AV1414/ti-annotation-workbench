@@ -74,7 +74,7 @@ export function ExportDialog({ taskId, stats }: ExportDialogProps) {
       </DialogTrigger>
 
       {/* Bug 4: flex-col + max-h so header/footer pin and body scrolls */}
-      <DialogContent className="max-w-2xl flex flex-col max-h-[90vh] overflow-hidden">
+      <DialogContent className="!max-w-2xl flex flex-col max-h-[90vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>Export Annotations as JSONL</DialogTitle>
         </DialogHeader>
@@ -180,20 +180,19 @@ export function ExportDialog({ taskId, stats }: ExportDialogProps) {
           </p>
         </div>
 
-        {/* Bug 3: proper DialogFooter with all three visible action buttons */}
-        <DialogFooter>
+        <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end">
           <DialogClose asChild>
-            <Button variant="ghost">Cancel</Button>
+            <Button variant="ghost" size="sm" className="shrink-0 whitespace-nowrap">Cancel</Button>
           </DialogClose>
-          <Button variant="outline" onClick={handleCopyCurl}>
+          <Button variant="outline" size="sm" onClick={handleCopyCurl} className="shrink-0 whitespace-nowrap">
             {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
             Copy curl command
           </Button>
-          <Button onClick={handleDownload} disabled={totalLines === 0}>
+          <Button size="sm" onClick={handleDownload} disabled={totalLines === 0} className="shrink-0 whitespace-nowrap">
             <Download className="size-4" />
             Download JSONL{totalLines > 0 ? ` (${totalLines} lines)` : ''}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
