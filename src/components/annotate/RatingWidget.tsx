@@ -184,15 +184,8 @@ function FourPointRater({ value, onChange }: SubWidgetProps) {
 
 // ── Likert 7 ─────────────────────────────────────────────────────────────
 
-const LIKERT_7_PREFERENCE = [
-  { label: 'A strongly' },
-  { label: 'A better' },
-  { label: 'A slightly' },
-  { label: 'Tie' },
-  { label: 'B slightly' },
-  { label: 'B better' },
-  { label: 'B strongly' },
-] as const;
+// Numeric labels for preference Likert — 1 = strongly prefer A, 7 = strongly prefer B
+const LIKERT_7_NUMERIC = ['1', '2', '3', '4', '5', '6', '7'] as const;
 
 const LIKERT_7_RATING = [
   { label: '1\nWorst' },
@@ -226,7 +219,6 @@ const LIKERT_RATING_TO_VALUE: RatingValue[] = [
 
 function Likert7Rater({ value, onChange, taskType }: SubWidgetProps) {
   const isRating = taskType === 'rating';
-  const positions = isRating ? LIKERT_7_RATING : LIKERT_7_PREFERENCE;
   const valueMap = isRating ? LIKERT_RATING_TO_VALUE : LIKERT_PREF_TO_VALUE;
 
   const activeIndex = valueMap.findIndex(
@@ -237,25 +229,57 @@ function Likert7Rater({ value, onChange, taskType }: SubWidgetProps) {
     onChange(activeIndex === i ? null : valueMap[i]);
   };
 
+  if (isRating) {
+    return (
+      <div className="flex overflow-x-auto rounded-lg border bg-background">
+        {LIKERT_7_RATING.map((pos, i) => {
+          const colors = SEGMENT_COLORS[i] ?? SEGMENT_COLORS[3];
+          const isActive = activeIndex === i;
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => handleSegment(i)}
+              className={cn(
+                'flex-1 min-w-[60px] border-r last:border-r-0 px-2 py-2.5 text-center text-[11px] leading-tight font-medium transition-colors whitespace-pre-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50',
+                isActive ? colors.active : colors.inactive,
+              )}
+            >
+              {pos.label}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Preference Likert: numeric 1–7, uniform primary fill
   return (
-    <div className="flex overflow-x-auto rounded-lg border bg-background">
-      {positions.map((pos, i) => {
-        const colors = SEGMENT_COLORS[i] ?? SEGMENT_COLORS[3];
-        const isActive = activeIndex === i;
-        return (
-          <button
-            key={i}
-            type="button"
-            onClick={() => handleSegment(i)}
-            className={cn(
-              'flex-1 min-w-[60px] border-r last:border-r-0 px-2 py-2.5 text-center text-[11px] leading-tight font-medium transition-colors whitespace-pre-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50',
-              isActive ? colors.active : colors.inactive,
-            )}
-          >
-            {pos.label}
-          </button>
-        );
-      })}
+    <div className="space-y-2">
+      <p className="text-xs text-muted-foreground">
+        Rate from <span className="font-medium">1</span> (strongly prefer A) to{' '}
+        <span className="font-medium">7</span> (strongly prefer B). 4 = tie.
+      </p>
+      <div className="flex overflow-x-auto rounded-lg border bg-background">
+        {LIKERT_7_NUMERIC.map((label, i) => {
+          const isActive = activeIndex === i;
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => handleSegment(i)}
+              className={cn(
+                'flex-1 min-w-[40px] border-r last:border-r-0 px-2 py-2.5 text-center text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring/50',
+                isActive
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-background text-muted-foreground hover:bg-muted hover:text-foreground',
+              )}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
